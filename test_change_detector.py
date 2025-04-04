@@ -2,22 +2,22 @@
 
 import os
 import json
-import logging
 from match_list_change_detector import MatchListChangeDetector
+from logging_config import get_logger
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger('test_change_detector')
+# Get logger
+logger = get_logger('test_change_detector')
 
-# Check for required environment variables
-username = os.environ.get('FOGIS_USERNAME')
-password = os.environ.get('FOGIS_PASSWORD')
+# Get configuration
+from config import get_config
+config = get_config()
+
+# Get credentials from configuration
+username = config.get('FOGIS_USERNAME')
+password = config.get('FOGIS_PASSWORD')
 
 if not username or not password:
-    logger.error("FOGIS_USERNAME and FOGIS_PASSWORD environment variables must be set")
+    logger.error("FOGIS_USERNAME and FOGIS_PASSWORD must be set in configuration")
     exit(1)
 
 # Create a test detector

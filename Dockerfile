@@ -7,10 +7,15 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY match_list_change_detector.py .
+COPY *.py .
+COPY tests/ ./tests/
+
+# Create logs directory
+RUN mkdir -p /app/logs
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
+ENV LOG_DIR=/app/logs
 
 # Run the script
 CMD ["python", "match_list_change_detector.py"]

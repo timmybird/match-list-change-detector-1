@@ -2,32 +2,29 @@
 
 import os
 import json
-import logging
 import subprocess
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Tuple
 
 from fogis_api_client import FogisApiClient, MatchListFilter
+from logging_config import get_logger
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.StreamHandler(),
-        logging.FileHandler('match_list_change_detector.log')
-    ]
-)
-logger = logging.getLogger('match_list_change_detector')
+# Get logger
+logger = get_logger('match_list_change_detector')
+
+# Import configuration
+from config import get_config
+
+# Get configuration
+config = get_config()
 
 # Constants
-PREVIOUS_MATCHES_FILE = 'previous_matches.json'
-DOCKER_COMPOSE_FILE = os.environ.get(
-    'DOCKER_COMPOSE_FILE', '../MatchListProcessor/docker-compose.yml')
-FOGIS_USERNAME = os.environ.get('FOGIS_USERNAME')
-FOGIS_PASSWORD = os.environ.get('FOGIS_PASSWORD')
-DAYS_BACK = int(os.environ.get('DAYS_BACK', '7'))
-DAYS_AHEAD = int(os.environ.get('DAYS_AHEAD', '365'))
+PREVIOUS_MATCHES_FILE = config.get('PREVIOUS_MATCHES_FILE')
+DOCKER_COMPOSE_FILE = config.get('DOCKER_COMPOSE_FILE')
+FOGIS_USERNAME = config.get('FOGIS_USERNAME')
+FOGIS_PASSWORD = config.get('FOGIS_PASSWORD')
+DAYS_BACK = config.get('DAYS_BACK')
+DAYS_AHEAD = config.get('DAYS_AHEAD')
 
 
 class MatchListChangeDetector:
@@ -327,14 +324,16 @@ class MatchListChangeDetector:
 
 def main():
     """Main entry point for the script."""
-    # Check for required environment variables
-    if not FOGIS_USERNAME or not FOGIS_PASSWORD:
-        logger.error(
-            "FOGIS_USERNAME and FOGIS_PASSWORD environment variables must be set")
+    # Check for required configuration
+    username = config.get('FOGIS_USERNAME')
+    password = config.get('FOGIS_PASSWORD')
+
+    if not username or not password:
+        logger.error("FOGIS_USERNAME and FOGIS_PASSWORD must be set in configuration")
         return False
 
     # Create and run the detector
-    detector = MatchListChangeDetector(FOGIS_USERNAME, FOGIS_PASSWORD)
+    detector = MatchListChangeDetector(username, password)
     success = detector.run()
 
     if success:

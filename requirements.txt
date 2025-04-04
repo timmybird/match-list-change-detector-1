@@ -1,3 +1,11 @@
+# API client
 fogis-api-client-timmyBird==0.0.5
+
+# HTTP and parsing
 requests>=2.25.0
 beautifulsoup4>=4.9.0
+
+# Testing and development
+pytest>=7.0.0
+pytest-cov>=4.0.0
+flake8>=6.0.0

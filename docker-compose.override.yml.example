@@ -1,0 +1,16 @@
+version: '3'
+
+services:
+  match-list-change-detector:
+    # You can override any settings from the main docker-compose.yml file here
+    environment:
+      # Example: Override the log level
+      - LOG_LEVEL=DEBUG
+      
+      # Example: Override the days ahead/back
+      # - DAYS_BACK=14
+      # - DAYS_AHEAD=90
+    
+    # Example: Add additional volumes
+    # volumes:
+    #   - ./custom_config:/app/config

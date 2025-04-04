@@ -5,16 +5,26 @@ services:
     image: alpine:latest
     container_name: match-list-change-detector-scheduler
     environment:
-      - TZ=Europe/Stockholm
+      - TZ=${TZ:-Europe/Stockholm}
     command: >
       sh -c "
-        echo '0 * * * * docker-compose -f /app/docker-compose.yml up -d match-list-change-detector' > /etc/crontabs/root &&
+        echo '0 * * * * cd /app && docker-compose up -d match-list-change-detector' > /etc/crontabs/root &&
         crond -f -d 8
       "
     volumes:
+      # Docker Compose files
       - ./docker-compose.yml:/app/docker-compose.yml
-      - /var/run/docker.sock:/var/run/docker.sock
+      - ./docker-compose.override.yml:/app/docker-compose.override.yml
+
+      # Environment variables
       - ./.env:/app/.env
+
+      # Docker socket for running Docker commands
+      - /var/run/docker.sock:/var/run/docker.sock
+
+      # Data and logs directories
+      - ./data:/app/data
+      - ./logs:/app/logs
     networks:
       - ${CONTAINER_NETWORK:-fogis-network}
     restart: unless-stopped

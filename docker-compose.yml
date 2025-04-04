@@ -5,17 +5,34 @@ services:
     build: .
     container_name: match-list-change-detector
     environment:
+      # API credentials
       - FOGIS_USERNAME=${FOGIS_USERNAME}
       - FOGIS_PASSWORD=${FOGIS_PASSWORD}
+
+      # Match list configuration
       - DAYS_BACK=${DAYS_BACK:-7}
       - DAYS_AHEAD=${DAYS_AHEAD:-365}
-      - DOCKER_COMPOSE_FILE=${ORCHESTRATOR_DOCKER_COMPOSE_PATH:-../MatchListProcessor/docker-compose.yml}
-      - TZ=Europe/Stockholm
+      - PREVIOUS_MATCHES_FILE=${PREVIOUS_MATCHES_FILE:-previous_matches.json}
+
+      # Orchestrator configuration
+      - DOCKER_COMPOSE_FILE=${DOCKER_COMPOSE_FILE:-../MatchListProcessor/docker-compose.yml}
+
+      # Logging configuration
+      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+      - LOG_DIR=/app/logs
+      - LOG_FILE=${LOG_FILE:-match_list_change_detector.log}
+
+      # Timezone
+      - TZ=${TZ:-Europe/Stockholm}
     volumes:
-      - ./previous_matches.json:/app/previous_matches.json
-      - ./match_changes.json:/app/match_changes.json
-      - ./match_list_change_detector.log:/app/match_list_change_detector.log
-      - ${ORCHESTRATOR_DOCKER_COMPOSE_PATH:-../MatchListProcessor/docker-compose.yml}:/app/orchestrator-docker-compose.yml
+      # Data files
+      - ./data:/app/data
+
+      # Logs
+      - ./logs:/app/logs
+
+      # Orchestrator docker-compose file
+      - ${DOCKER_COMPOSE_FILE:-../MatchListProcessor/docker-compose.yml}:/app/orchestrator-docker-compose.yml
     networks:
       - ${CONTAINER_NETWORK:-fogis-network}
     restart: unless-stopped
@@ -23,3 +40,7 @@ services:
 networks:
   fogis-network:
     external: true
+
+volumes:
+  data:
+    driver: local
