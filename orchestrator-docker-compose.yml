@@ -1,0 +1,36 @@
+version: '3'
+
+services:
+  # This is a placeholder for your actual orchestrator services
+  # Replace with your actual services that sync matches to calendar,
+  # add referee contacts to Google, and create WhatsApp group assets
+
+  calendar-sync:
+    image: your-calendar-sync-image
+    container_name: calendar-sync
+    environment:
+      - GOOGLE_CALENDAR_API_KEY=${GOOGLE_CALENDAR_API_KEY}
+      - TZ=Europe/Stockholm
+    volumes:
+      - ./match_changes.json:/app/match_changes.json
+    # Add any other configuration needed for your calendar sync service
+
+  contact-sync:
+    image: your-contact-sync-image
+    container_name: contact-sync
+    environment:
+      - GOOGLE_CONTACTS_API_KEY=${GOOGLE_CONTACTS_API_KEY}
+      - TZ=Europe/Stockholm
+    volumes:
+      - ./match_changes.json:/app/match_changes.json
+    # Add any other configuration needed for your contact sync service
+
+  whatsapp-assets:
+    image: your-whatsapp-assets-image
+    container_name: whatsapp-assets
+    environment:
+      - TZ=Europe/Stockholm
+    volumes:
+      - ./match_changes.json:/app/match_changes.json
+      - ./whatsapp-assets:/app/output
+    # Add any other configuration needed for your WhatsApp assets service
