@@ -1,0 +1,29 @@
+documentation:
+  - README.md
+  - docs/**/*
+
+dependencies:
+  - requirements.txt
+  - Pipfile
+  - Pipfile.lock
+  - pyproject.toml
+  - setup.py
+
+docker:
+  - Dockerfile
+  - docker-compose.yml
+  - scheduled-docker-compose.yml
+  - docker-compose.override.yml.example
+
+tests:
+  - tests/**/*
+  - pytest.ini
+
+github-actions:
+  - .github/workflows/*
+
+configuration:
+  - config.py
+  - logging_config.py
+  - setup.cfg
+  - .env.example

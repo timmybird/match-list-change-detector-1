@@ -1,5 +1,9 @@
 # Match List Change Detector
 
+[![CI](https://github.com/timmybird/match-list-change-detector/actions/workflows/ci.yml/badge.svg)](https://github.com/timmybird/match-list-change-detector/actions/workflows/ci.yml)
+[![Docker](https://github.com/timmybird/match-list-change-detector/actions/workflows/docker.yml/badge.svg)](https://github.com/timmybird/match-list-change-detector/actions/workflows/docker.yml)
+[![Security](https://github.com/timmybird/match-list-change-detector/actions/workflows/security.yml/badge.svg)](https://github.com/timmybird/match-list-change-detector/actions/workflows/security.yml)
+
 A Python application that detects changes in your football referee match list and triggers actions when changes are found.
 
 ## Overview
@@ -159,6 +163,33 @@ You can customize the behavior of the change detector by modifying the following
 
 ### Timezone
 - `TZ`: Timezone (default: Europe/Stockholm)
+
+## CI/CD Pipeline
+
+This project uses GitHub Actions for continuous integration and deployment:
+
+### Workflows
+
+- **CI**: Runs tests and linting on Python 3.9, 3.10, and 3.11
+- **Docker**: Builds and publishes Docker images to GitHub Container Registry
+- **Security**: Runs security scans including CodeQL and Bandit
+- **Dependencies**: Automatically updates dependencies weekly
+- **Release**: Creates GitHub releases when tags are pushed
+- **Stale**: Marks and closes stale issues and pull requests
+- **Labeler**: Automatically labels pull requests based on changed files
+- **Greetings**: Welcomes new contributors
+
+### Docker Images
+
+Docker images are automatically built and published to GitHub Container Registry:
+
+```bash
+# Pull the latest image
+docker pull ghcr.io/timmybird/match-list-change-detector:main
+
+# Or pull a specific version
+docker pull ghcr.io/timmybird/match-list-change-detector:v1.0.0
+```
 
 ## Contributing
 
