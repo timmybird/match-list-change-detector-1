@@ -24,6 +24,8 @@ services:
 
       # Timezone
       - TZ=${TZ:-Europe/Stockholm}
+    ports:
+      - "8000:8000"  # Metrics and health check
     volumes:
       # Data files
       - ./data:/app/data

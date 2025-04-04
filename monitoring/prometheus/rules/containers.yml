@@ -1,0 +1,38 @@
+groups:
+  - name: containers
+    rules:
+      - alert: ContainerKilled
+        expr: time() - container_last_seen > 60
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container killed on {{ $labels.instance }}"
+          description: "Container {{ $labels.name }} has been killed and not restarted for more than 5 minutes."
+
+      - alert: ContainerHighCPUUsage
+        expr: sum by(name) (rate(container_cpu_usage_seconds_total{name!=""}[5m])) / count by(name) (container_spec_cpu_shares{name!=""}) * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container high CPU usage on {{ $labels.instance }}"
+          description: "Container {{ $labels.name }} CPU usage is above 80% for more than 5 minutes."
+
+      - alert: ContainerHighMemoryUsage
+        expr: container_memory_usage_bytes{name!=""} / container_spec_memory_limit_bytes{name!=""} * 100 > 80
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container high memory usage on {{ $labels.instance }}"
+          description: "Container {{ $labels.name }} memory usage is above 80% for more than 5 minutes."
+
+      - alert: ContainerHighThrottleRate
+        expr: rate(container_cpu_cfs_throttled_seconds_total[5m]) > 1
+        for: 5m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container high throttle rate on {{ $labels.instance }}"
+          description: "Container {{ $labels.name }} is being throttled."

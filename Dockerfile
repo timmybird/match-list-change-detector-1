@@ -17,5 +17,8 @@ RUN mkdir -p /app/logs
 ENV PYTHONUNBUFFERED=1
 ENV LOG_DIR=/app/logs
 
+# Expose ports for metrics and health check
+EXPOSE 8000
+
 # Run the script
 CMD ["python", "match_list_change_detector.py"]

@@ -3,14 +3,21 @@
 import os
 import json
 import subprocess
+import time
 from datetime import datetime, timedelta
 from typing import Dict, List, Any, Tuple
 
 from fogis_api_client import FogisApiClient, MatchListFilter
 from logging_config import get_logger
+from metrics import metrics
+from health_server import HealthServer
 
 # Get logger
 logger = get_logger('match_list_change_detector')
+
+# Start health server
+health_server = HealthServer(port=8000)
+health_server.start()
 
 # Import configuration
 from config import get_config
@@ -70,7 +77,8 @@ class MatchListChangeDetector:
         """Fetch the current list of matches from the API."""
         try:
             # Login to the API
-            self.api_client.login()
+            with metrics.time_api_request():
+                self.api_client.login()
             logger.info("Successfully logged in to the API")
 
             # Create a filter for matches
@@ -83,7 +91,8 @@ class MatchListChangeDetector:
                 .end_date(end_date)
 
             # Fetch matches
-            self.current_matches = match_filter.fetch_filtered_matches(self.api_client)
+            with metrics.time_api_request():
+                self.current_matches = match_filter.fetch_filtered_matches(self.api_client)
             logger.info(f"Successfully fetched {len(self.current_matches)} current matches")
             return True
         except Exception as e:
@@ -295,6 +304,9 @@ class MatchListChangeDetector:
 
     def run(self) -> bool:
         """Run the full change detection process."""
+        start_time = time.time()
+        metrics.record_run()
+
         try:
             # Load previous matches
             self.load_previous_matches()
@@ -302,23 +314,44 @@ class MatchListChangeDetector:
             # Fetch current matches
             if not self.fetch_current_matches():
                 logger.error("Failed to fetch current matches, aborting")
+                metrics.record_fetch_failure()
+                metrics.record_error()
                 return False
+
+            # Record match count
+            metrics.record_matches(len(self.current_matches))
 
             # Detect changes
             has_changes, changes = self.detect_changes()
 
+            # Record changes
+            if has_changes:
+                metrics.record_changes(
+                    new=changes.get('new_matches', 0),
+                    removed=changes.get('removed_matches', 0),
+                    changed=changes.get('changed_matches', 0)
+                )
+
             # If changes detected, trigger docker-compose
             if has_changes:
                 logger.info("Changes detected, triggering docker-compose")
-                self.trigger_docker_compose(changes)
+                metrics.record_orchestrator_trigger()
+                if not self.trigger_docker_compose(changes):
+                    metrics.record_orchestrator_failure()
 
             # Save current matches for next comparison
             self.save_current_matches()
+
+            # Record processing time
+            processing_time = time.time() - start_time
+            metrics.record_processing_time(processing_time)
+            logger.info(f"Change detection completed in {processing_time:.2f} seconds")
 
             return True
 
         except Exception as e:
             logger.error(f"Error in change detection process: {e}")
+            metrics.record_error()
             return False
 
 

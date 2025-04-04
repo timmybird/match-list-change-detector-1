@@ -5,6 +5,9 @@ fogis-api-client-timmyBird==0.0.5
 requests>=2.25.0
 beautifulsoup4>=4.9.0
 
+# Monitoring and metrics
+prometheus-client>=0.16.0
+
 # Testing and development
 pytest>=7.0.0
 pytest-cov>=4.0.0

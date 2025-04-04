@@ -1,0 +1,40 @@
+global:
+  resolve_timeout: 5m
+  slack_api_url: '${SLACK_WEBHOOK:-https://hooks.slack.com/services/your-webhook-id}'
+
+route:
+  group_by: ['alertname', 'job', 'severity']
+  group_wait: 30s
+  group_interval: 5m
+  repeat_interval: 4h
+  receiver: 'slack-notifications'
+  routes:
+  - match:
+      severity: critical
+    receiver: 'discord-critical'
+    continue: true
+  - match:
+      severity: warning
+    receiver: 'slack-notifications'
+    continue: true
+  - match:
+      severity: critical
+    receiver: 'slack-notifications'
+
+receivers:
+- name: 'slack-notifications'
+  webhook_configs:
+  - url: 'http://alertmanager-slack-bridge:8080/alert'
+    send_resolved: true
+
+- name: 'discord-critical'
+  webhook_configs:
+  - url: 'http://alertmanager-discord:9094'
+    send_resolved: true
+
+inhibit_rules:
+  - source_match:
+      severity: 'critical'
+    target_match:
+      severity: 'warning'
+    equal: ['alertname', 'instance']
