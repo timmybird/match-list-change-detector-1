@@ -1,37 +1,41 @@
 #!/usr/bin/env python3
+"""
+Match list change detector for the Fogis API.
 
-import os
+Detects changes in match lists and triggers actions when changes are found.
+"""
+
 import json
+import os
 import subprocess
 import time
 from datetime import datetime, timedelta
-from typing import Dict, List, Any, Tuple
+from typing import Any, Dict, List, Tuple
 
 from fogis_api_client import FogisApiClient, MatchListFilter
+
+from config import get_config
+from health_server import HealthServer
 from logging_config import get_logger
 from metrics import metrics
-from health_server import HealthServer
 
 # Get logger
-logger = get_logger('match_list_change_detector')
+logger = get_logger("match_list_change_detector")
 
 # Start health server
 health_server = HealthServer(port=8000)
 health_server.start()
 
-# Import configuration
-from config import get_config
-
 # Get configuration
 config = get_config()
 
 # Constants
-PREVIOUS_MATCHES_FILE = config.get('PREVIOUS_MATCHES_FILE')
-DOCKER_COMPOSE_FILE = config.get('DOCKER_COMPOSE_FILE')
-FOGIS_USERNAME = config.get('FOGIS_USERNAME')
-FOGIS_PASSWORD = config.get('FOGIS_PASSWORD')
-DAYS_BACK = config.get('DAYS_BACK')
-DAYS_AHEAD = config.get('DAYS_AHEAD')
+PREVIOUS_MATCHES_FILE = config.get("PREVIOUS_MATCHES_FILE")
+DOCKER_COMPOSE_FILE = config.get("DOCKER_COMPOSE_FILE")
+FOGIS_USERNAME = config.get("FOGIS_USERNAME")
+FOGIS_PASSWORD = config.get("FOGIS_PASSWORD")
+DAYS_BACK = config.get("DAYS_BACK")
+DAYS_AHEAD = config.get("DAYS_AHEAD")
 
 
 class MatchListChangeDetector:
@@ -47,11 +51,12 @@ class MatchListChangeDetector:
         """Load the previously saved matches from file."""
         try:
             if os.path.exists(PREVIOUS_MATCHES_FILE):
-                with open(PREVIOUS_MATCHES_FILE, 'r') as f:
+                with open(PREVIOUS_MATCHES_FILE, "r") as f:
                     self.previous_matches = json.load(f)
                 logger.info(
                     f"Loaded {len(self.previous_matches)} previous matches from "
-                    f"{PREVIOUS_MATCHES_FILE}")
+                    f"{PREVIOUS_MATCHES_FILE}"
+                )
                 return True
             else:
                 logger.info(f"No previous matches file found at {PREVIOUS_MATCHES_FILE}")
@@ -63,11 +68,12 @@ class MatchListChangeDetector:
     def save_current_matches(self) -> bool:
         """Save the current matches to file for future comparison."""
         try:
-            with open(PREVIOUS_MATCHES_FILE, 'w') as f:
+            with open(PREVIOUS_MATCHES_FILE, "w") as f:
                 # noinspection PyTypeChecker
                 json.dump(self.current_matches, f, indent=2)
             logger.info(
-                f"Saved {len(self.current_matches)} current matches to {PREVIOUS_MATCHES_FILE}")
+                f"Saved {len(self.current_matches)} current matches to {PREVIOUS_MATCHES_FILE}"
+            )
             return True
         except Exception as e:
             logger.error(f"Error saving current matches: {e}")
@@ -83,12 +89,10 @@ class MatchListChangeDetector:
 
             # Create a filter for matches
             today = datetime.today()
-            start_date = (today - timedelta(days=DAYS_BACK)).strftime('%Y-%m-%d')
-            end_date = (today + timedelta(days=DAYS_AHEAD)).strftime('%Y-%m-%d')
+            start_date = (today - timedelta(days=DAYS_BACK)).strftime("%Y-%m-%d")
+            end_date = (today + timedelta(days=DAYS_AHEAD)).strftime("%Y-%m-%d")
 
-            match_filter = MatchListFilter() \
-                .start_date(start_date) \
-                .end_date(end_date)
+            match_filter = MatchListFilter().start_date(start_date).end_date(end_date)
 
             # Fetch matches
             with metrics.time_api_request():
@@ -109,18 +113,15 @@ class MatchListChangeDetector:
             - Dictionary with details about the changes
         """
         if not self.previous_matches:
-            logger.info(
-                "No previous matches to compare with, considering this as a change")
+            logger.info("No previous matches to compare with, considering this as a change")
             return True, {
                 "new_matches": len(self.current_matches),
-                "message": "Initial match list fetch"
+                "message": "Initial match list fetch",
             }
 
         # Create dictionaries for easier comparison, using match ID as key
-        prev_matches_dict = {match['matchid']: match
-                             for match in self.previous_matches}
-        curr_matches_dict = {match['matchid']: match
-                             for match in self.current_matches}
+        prev_matches_dict = {match["matchid"]: match for match in self.previous_matches}
+        curr_matches_dict = {match["matchid"]: match for match in self.current_matches}
 
         # Find new, removed, and changed matches
         new_match_ids = set(curr_matches_dict.keys()) - set(prev_matches_dict.keys())
@@ -136,15 +137,14 @@ class MatchListChangeDetector:
             # Check for important changes (date, time, venue, referees, teams, status)
             # Compare basic match details
             basic_changes = (
-                prev_match.get('speldatum') != curr_match.get('speldatum') or
-                prev_match.get('avsparkstid') != curr_match.get('avsparkstid') or
-                prev_match.get('anlaggningnamn') !=
-                curr_match.get('anlaggningnamn') or
-                prev_match.get('installd') != curr_match.get('installd') or
-                prev_match.get('avbruten') != curr_match.get('avbruten') or
-                prev_match.get('uppskjuten') != curr_match.get('uppskjuten') or
-                prev_match.get('lag1lagid') != curr_match.get('lag1lagid') or
-                prev_match.get('lag2lagid') != curr_match.get('lag2lagid')
+                prev_match.get("speldatum") != curr_match.get("speldatum")
+                or prev_match.get("avsparkstid") != curr_match.get("avsparkstid")
+                or prev_match.get("anlaggningnamn") != curr_match.get("anlaggningnamn")
+                or prev_match.get("installd") != curr_match.get("installd")
+                or prev_match.get("avbruten") != curr_match.get("avbruten")
+                or prev_match.get("uppskjuten") != curr_match.get("uppskjuten")
+                or prev_match.get("lag1lagid") != curr_match.get("lag1lagid")
+                or prev_match.get("lag2lagid") != curr_match.get("lag2lagid")
             )
 
             # Compare referee assignments
@@ -152,114 +152,113 @@ class MatchListChangeDetector:
             curr_referee_ids = set()
 
             # Extract referee IDs from previous match
-            if 'domaruppdraglista' in prev_match:
-                for referee in prev_match['domaruppdraglista']:
-                    prev_referee_ids.add(referee.get('domareid'))
+            if "domaruppdraglista" in prev_match:
+                for referee in prev_match["domaruppdraglista"]:
+                    prev_referee_ids.add(referee.get("domareid"))
 
             # Extract referee IDs from current match
-            if 'domaruppdraglista' in curr_match:
-                for referee in curr_match['domaruppdraglista']:
-                    curr_referee_ids.add(referee.get('domareid'))
+            if "domaruppdraglista" in curr_match:
+                for referee in curr_match["domaruppdraglista"]:
+                    curr_referee_ids.add(referee.get("domareid"))
 
             referee_changes = prev_referee_ids != curr_referee_ids
 
             if basic_changes or referee_changes:
-
                 # Create a detailed change record
                 change_record = {
-                    'match_id': match_id,
-                    'match_nr': curr_match.get('matchnr'),
-                    'previous': {
-                        'date': prev_match.get('speldatum'),
-                        'time': prev_match.get('avsparkstid'),
-                        'home_team': {
-                            'id': prev_match.get('lag1lagid'),
-                            'name': prev_match.get('lag1namn')
+                    "match_id": match_id,
+                    "match_nr": curr_match.get("matchnr"),
+                    "previous": {
+                        "date": prev_match.get("speldatum"),
+                        "time": prev_match.get("avsparkstid"),
+                        "home_team": {
+                            "id": prev_match.get("lag1lagid"),
+                            "name": prev_match.get("lag1namn"),
                         },
-                        'away_team': {
-                            'id': prev_match.get('lag2lagid'),
-                            'name': prev_match.get('lag2namn')
+                        "away_team": {
+                            "id": prev_match.get("lag2lagid"),
+                            "name": prev_match.get("lag2namn"),
                         },
-                        'venue': prev_match.get('anlaggningnamn'),
-                        'status': {
-                            'cancelled': prev_match.get('installd', False),
-                            'interrupted': prev_match.get('avbruten', False),
-                            'postponed': prev_match.get('uppskjuten', False)
+                        "venue": prev_match.get("anlaggningnamn"),
+                        "status": {
+                            "cancelled": prev_match.get("installd", False),
+                            "interrupted": prev_match.get("avbruten", False),
+                            "postponed": prev_match.get("uppskjuten", False),
                         },
-                        'referees': []
+                        "referees": [],
                     },
-                    'current': {
-                        'date': curr_match.get('speldatum'),
-                        'time': curr_match.get('avsparkstid'),
-                        'home_team': {
-                            'id': curr_match.get('lag1lagid'),
-                            'name': curr_match.get('lag1namn')
+                    "current": {
+                        "date": curr_match.get("speldatum"),
+                        "time": curr_match.get("avsparkstid"),
+                        "home_team": {
+                            "id": curr_match.get("lag1lagid"),
+                            "name": curr_match.get("lag1namn"),
                         },
-                        'away_team': {
-                            'id': curr_match.get('lag2lagid'),
-                            'name': curr_match.get('lag2namn')
+                        "away_team": {
+                            "id": curr_match.get("lag2lagid"),
+                            "name": curr_match.get("lag2namn"),
                         },
-                        'venue': curr_match.get('anlaggningnamn'),
-                        'status': {
-                            'cancelled': curr_match.get('installd', False),
-                            'interrupted': curr_match.get('avbruten', False),
-                            'postponed': curr_match.get('uppskjuten', False)
+                        "venue": curr_match.get("anlaggningnamn"),
+                        "status": {
+                            "cancelled": curr_match.get("installd", False),
+                            "interrupted": curr_match.get("avbruten", False),
+                            "postponed": curr_match.get("uppskjuten", False),
                         },
-                        'referees': []
+                        "referees": [],
                     },
-                    'changes': {
-                        'basic': basic_changes,
-                        'referees': referee_changes
-                    }
+                    "changes": {"basic": basic_changes, "referees": referee_changes},
                 }
 
                 # Add referee details to previous match
-                if 'domaruppdraglista' in prev_match:
-                    for referee in prev_match['domaruppdraglista']:
-                        change_record['previous']['referees'].append({
-                            'id': referee.get('domareid'),
-                            'name': referee.get('personnamn'),
-                            'role': referee.get('domarrollnamn'),
-                            'email': referee.get('epostadress'),
-                            'phone': referee.get('mobiltelefon')
-                        })
+                if "domaruppdraglista" in prev_match:
+                    for referee in prev_match["domaruppdraglista"]:
+                        change_record["previous"]["referees"].append(
+                            {
+                                "id": referee.get("domareid"),
+                                "name": referee.get("personnamn"),
+                                "role": referee.get("domarrollnamn"),
+                                "email": referee.get("epostadress"),
+                                "phone": referee.get("mobiltelefon"),
+                            }
+                        )
 
                 # Add referee details to current match
-                if 'domaruppdraglista' in curr_match:
-                    for referee in curr_match['domaruppdraglista']:
-                        change_record['current']['referees'].append({
-                            'id': referee.get('domareid'),
-                            'name': referee.get('personnamn'),
-                            'role': referee.get('domarrollnamn'),
-                            'email': referee.get('epostadress'),
-                            'phone': referee.get('mobiltelefon')
-                        })
+                if "domaruppdraglista" in curr_match:
+                    for referee in curr_match["domaruppdraglista"]:
+                        change_record["current"]["referees"].append(
+                            {
+                                "id": referee.get("domareid"),
+                                "name": referee.get("personnamn"),
+                                "role": referee.get("domarrollnamn"),
+                                "email": referee.get("epostadress"),
+                                "phone": referee.get("mobiltelefon"),
+                            }
+                        )
 
                 changed_matches.append(change_record)
 
         # Prepare the changes summary
         changes = {
-            'new_matches': len(new_match_ids),
-            'removed_matches': len(removed_match_ids),
-            'changed_matches': len(changed_matches),
-            'new_match_details': [
-                curr_matches_dict[match_id] for match_id in new_match_ids
-            ],
-            'removed_match_details': [
+            "new_matches": len(new_match_ids),
+            "removed_matches": len(removed_match_ids),
+            "changed_matches": len(changed_matches),
+            "new_match_details": [curr_matches_dict[match_id] for match_id in new_match_ids],
+            "removed_match_details": [
                 prev_matches_dict[match_id] for match_id in removed_match_ids
             ],
-            'changed_match_details': changed_matches
+            "changed_match_details": changed_matches,
         }
 
         # Determine if there are any changes
-        has_changes = (len(new_match_ids) > 0 or
-                       len(removed_match_ids) > 0 or
-                       len(changed_matches) > 0)
+        has_changes = (
+            len(new_match_ids) > 0 or len(removed_match_ids) > 0 or len(changed_matches) > 0
+        )
 
         if has_changes:
             logger.info(
                 f"Changes detected: {len(new_match_ids)} new, "
-                f"{len(removed_match_ids)} removed, {len(changed_matches)} changed")
+                f"{len(removed_match_ids)} removed, {len(changed_matches)} changed"
+            )
         else:
             logger.info("No changes detected in match list")
 
@@ -270,7 +269,7 @@ class MatchListChangeDetector:
         """Trigger the docker-compose file with the changes as environment variables."""
         try:
             # Save changes to a file that can be read by the docker-compose services
-            with open('match_changes.json', 'w') as f:
+            with open("match_changes.json", "w") as f:
                 # noinspection PyTypeChecker
                 json.dump(changes, f, indent=2)
 
@@ -278,16 +277,17 @@ class MatchListChangeDetector:
             logger.info(f"Triggering docker-compose with file: {DOCKER_COMPOSE_FILE}")
             try:
                 result = subprocess.run(
-                    ['docker-compose', '-f', DOCKER_COMPOSE_FILE, 'up', '-d'],
+                    ["docker-compose", "-f", DOCKER_COMPOSE_FILE, "up", "-d"],
                     capture_output=True,
                     text=True,
-                    timeout=30  # 30 second timeout
+                    timeout=30,  # 30 second timeout
                 )
             except subprocess.TimeoutExpired:
                 logger.warning("docker-compose command timed out after 30 seconds")
                 logger.warning("This is normal if the orchestrator is starting many services")
                 logger.warning(
-                    "The orchestrator has been triggered, but we're not waiting for it to complete")
+                    "The orchestrator has been triggered, but we're not waiting for it to complete"
+                )
                 return True
 
             if result.returncode == 0:
@@ -327,9 +327,9 @@ class MatchListChangeDetector:
             # Record changes
             if has_changes:
                 metrics.record_changes(
-                    new=changes.get('new_matches', 0),
-                    removed=changes.get('removed_matches', 0),
-                    changed=changes.get('changed_matches', 0)
+                    new=changes.get("new_matches", 0),
+                    removed=changes.get("removed_matches", 0),
+                    changed=changes.get("changed_matches", 0),
                 )
 
             # If changes detected, trigger docker-compose
@@ -356,10 +356,10 @@ class MatchListChangeDetector:
 
 
 def main():
-    """Main entry point for the script."""
+    """Run the match list change detection process."""
     # Check for required configuration
-    username = config.get('FOGIS_USERNAME')
-    password = config.get('FOGIS_PASSWORD')
+    username = config.get("FOGIS_USERNAME")
+    password = config.get("FOGIS_PASSWORD")
 
     if not username or not password:
         logger.error("FOGIS_USERNAME and FOGIS_PASSWORD must be set in configuration")

@@ -133,7 +133,7 @@ AI agents contributing to this project should follow these additional guidelines
   ```bash
   # Good - Using a file
   gh issue create --title "Issue Title" --body-file description.md
-  
+
   # Avoid - Streaming Markdown
   echo "# Heading\nContent" | gh issue create --title "Issue Title" --body-stdin
   ```

@@ -1,1 +1,4 @@
-# This file makes the tests directory a Python package
+"""Test package for the match list change detector.
+
+Contains unit and integration tests for the application.
+"""
