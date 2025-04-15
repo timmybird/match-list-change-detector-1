@@ -104,6 +104,8 @@ python -m unittest discover -s tests
 - `match_list_change_detector.py`: The main Python script that detects changes
 - `config.py`: Configuration management
 - `logging_config.py`: Centralized logging configuration
+- `health_server.py`: Simple health check server
+- `metrics.py`: Prometheus metrics collection
 
 ### Docker Files
 - `Dockerfile`: Containerizes the Python script
@@ -121,6 +123,13 @@ python -m unittest discover -s tests
 - `.env.example`: Example environment variables file
 - `requirements.txt`: Lists the Python dependencies
 - `setup.cfg`: Configuration for development tools (flake8, etc.)
+- `pyproject.toml`: Configuration for Black, isort, and mypy
+- `.pre-commit-config.yaml`: Pre-commit hooks configuration
+
+### Documentation
+- `docs/`: Sphinx documentation
+  - `docs/source/`: Documentation source files
+  - `docs/build/html/`: Generated HTML documentation
 
 ### Tests
 - `tests/`: Directory containing unit tests
@@ -216,7 +225,18 @@ Contributions are welcome! Here's how you can contribute:
    pip install -r requirements.txt
    ```
 
-3. Run the tests:
+3. Install pre-commit hooks:
+   ```bash
+   pre-commit install
+   ```
+
+4. Run the tests:
    ```bash
    ./run_tests.sh
    ```
+
+5. Build the documentation:
+   ```bash
+   cd docs && make html
+   ```
+   Then open `docs/build/html/index.html` in your browser.
