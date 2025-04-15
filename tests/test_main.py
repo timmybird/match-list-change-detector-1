@@ -8,8 +8,10 @@ Verifies that the main function works correctly under various conditions.
 import unittest
 from unittest.mock import MagicMock, patch
 
-# Import the main function
-from match_list_change_detector import main
+# Mock the imports that would cause issues
+with patch("sys.modules", {"fogis_api_client": MagicMock()}):
+    # Now import the main function
+    from match_list_change_detector import main
 
 
 class TestMain(unittest.TestCase):

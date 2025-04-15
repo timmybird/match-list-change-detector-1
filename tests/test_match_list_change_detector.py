@@ -13,8 +13,10 @@ import tempfile
 import unittest
 from unittest.mock import MagicMock, patch
 
-# Import the module to test
-from match_list_change_detector import PREVIOUS_MATCHES_FILE, MatchListChangeDetector
+# Mock the imports that would cause issues
+with patch("sys.modules", {"fogis_api_client": MagicMock()}):
+    # Now import the module to test
+    from match_list_change_detector import PREVIOUS_MATCHES_FILE, MatchListChangeDetector
 
 
 class TestMatchListChangeDetector(unittest.TestCase):
