@@ -45,7 +45,7 @@ match_filter = (
     MatchListFilter()
     .start_date(today)
     .end_date(one_month_ahead)
-    .exclude_statuses([MatchStatus.CANCELLED, MatchStatus.INTERRUPTED])
+    .exclude_statuses({MatchStatus.CANCELLED, MatchStatus.INTERRUPTED})
 )
 
 # Fetch filtered matches

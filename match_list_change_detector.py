@@ -10,7 +10,7 @@ import os
 import subprocess
 import time
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Tuple, TypedDict, Union
 
 from fogis_api_client import FogisApiClient, MatchListFilter
 
@@ -18,6 +18,28 @@ from config import get_config
 from health_server import HealthServer
 from logging_config import get_logger
 from metrics import metrics
+
+
+class MatchChangeRecord(TypedDict):
+    """Type definition for a match change record."""
+
+    match_id: str
+    match_nr: str
+    previous: Dict[str, Any]
+    current: Dict[str, Any]
+    changes: Dict[str, bool]
+
+
+class ChangesSummary(TypedDict):
+    """Type definition for the changes summary dictionary."""
+
+    new_matches: int
+    removed_matches: int
+    changed_matches: int
+    new_match_details: List[Dict[str, Any]]
+    removed_match_details: List[Dict[str, Any]]
+    changed_match_details: List[MatchChangeRecord]
+
 
 # Get logger
 logger = get_logger("match_list_change_detector")
@@ -41,11 +63,15 @@ DAYS_AHEAD = config.get("DAYS_AHEAD")
 class MatchListChangeDetector:
     """Detects changes in the match list and triggers actions when changes are found."""
 
+    api_client: FogisApiClient
+    previous_matches: List[Dict[str, Any]]
+    current_matches: List[Dict[str, Any]]
+
     def __init__(self, username: str, password: str):
         """Initialize the detector with API credentials."""
         self.api_client = FogisApiClient(username, password)
-        self.previous_matches: List[Dict[str, Any]] = []
-        self.current_matches: List[Dict[str, Any]] = []
+        self.previous_matches = []
+        self.current_matches = []
 
     def load_previous_matches(self) -> bool:
         """Load the previously saved matches from file."""
@@ -103,7 +129,7 @@ class MatchListChangeDetector:
             logger.error(f"Error fetching current matches: {e}")
             return False
 
-    def detect_changes(self) -> Tuple[bool, Dict[str, Any]]:
+    def detect_changes(self) -> Tuple[bool, Union[ChangesSummary, Dict[str, Any]]]:
         """
         Detect changes between previous and current match lists.
 
@@ -265,7 +291,7 @@ class MatchListChangeDetector:
         return has_changes, changes
 
     # noinspection PyMethodMayBeStatic
-    def trigger_docker_compose(self, changes: Dict[str, Any]) -> bool:
+    def trigger_docker_compose(self, changes: Union[ChangesSummary, Dict[str, Any]]) -> bool:
         """Trigger the docker-compose file with the changes as environment variables."""
         try:
             # Save changes to a file that can be read by the docker-compose services
