@@ -225,10 +225,16 @@ Contributions are welcome! Here's how you can contribute:
    pip install -r requirements.txt
    ```
 
-3. Install pre-commit hooks:
+3. Install git hooks:
    ```bash
+   # Install pre-commit hooks
    pre-commit install
+
+   # Install pre-push hooks
+   ./scripts/install_hooks.sh
    ```
+
+   This will install both pre-commit hooks (run on commit) and pre-push hooks (run before pushing to GitHub).
 
 4. Run the tests:
    ```bash
