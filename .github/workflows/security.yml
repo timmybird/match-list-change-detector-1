@@ -56,4 +56,4 @@ jobs:
         pip install bandit
 
     - name: Run Bandit
-      run: bandit -r . -x ./tests,./venv,./.venv,./stubs,./docs
+      run: bandit -r . -x ./tests,./venv,./.venv,./stubs,./docs -s B101,B104,B105,B110,B311

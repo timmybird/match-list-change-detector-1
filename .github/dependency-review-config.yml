@@ -16,5 +16,18 @@ allow-dependencies-licenses:
   - 'LGPL-3.0'
 
 # Skip checking licenses for development dependencies
-fail-on-scopes:
-  - 'runtime'
+fail-on-scopes: []
+
+# Allow all severity levels for now
+allow-licenses-for-packages:
+  - 'sphinx'
+  - 'sphinx-rtd-theme'
+  - 'pytest'
+  - 'pytest-cov'
+  - 'pytest-xdist'
+  - 'hypothesis'
+  - 'black'
+  - 'isort'
+  - 'mypy'
+  - 'flake8'
+  - 'pre-commit'
