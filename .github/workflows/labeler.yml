@@ -15,3 +15,4 @@ jobs:
     - uses: actions/labeler@v4
       with:
         repo-token: "${{ secrets.GITHUB_TOKEN }}"
+      continue-on-error: true  # Don't fail the build for now
