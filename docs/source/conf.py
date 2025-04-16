@@ -10,8 +10,22 @@ https://www.sphinx-doc.org/en/master/usage/configuration.html
 import os
 import sys
 from typing import List
+from unittest.mock import MagicMock
 
 sys.path.insert(0, os.path.abspath("../.."))
+
+
+class Mock(MagicMock):
+    """Mock class for external modules."""
+
+    @classmethod
+    def __getattr__(cls, name):
+        """Return a MagicMock for any attribute."""
+        return MagicMock()
+
+
+MOCK_MODULES = ["fogis_api_client"]
+sys.modules.update((mod_name, Mock()) for mod_name in MOCK_MODULES)
 
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information

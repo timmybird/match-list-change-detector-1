@@ -8,6 +8,7 @@ dependencies:
   - Pipfile.lock
   - pyproject.toml
   - setup.py
+  - .pre-commit-config.yaml
 
 docker:
   - Dockerfile
@@ -27,3 +28,5 @@ configuration:
   - logging_config.py
   - setup.cfg
   - .env.example
+  - .coveragerc
+  - stubs/**/*
