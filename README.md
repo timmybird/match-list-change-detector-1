@@ -214,6 +214,29 @@ Contributions are welcome! Here's how you can contribute:
 
 ### Development Setup
 
+#### Quick Setup (Recommended)
+
+For a complete setup or when switching computers, use our all-in-one script:
+
+```bash
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate
+
+# Run the comprehensive setup script
+./scripts/update_environment.sh
+```
+
+This script will:
+- Install all dependencies
+- Set up pre-commit and pre-push hooks
+- Configure a post-merge hook to remind you when scripts change
+- Verify your local environment
+
+#### Manual Setup
+
+If you prefer to set things up manually:
+
 1. Create a virtual environment:
    ```bash
    python -m venv .venv
@@ -232,9 +255,10 @@ Contributions are welcome! Here's how you can contribute:
 
    # Install pre-push hooks
    ./scripts/install_hooks.sh
-   ```
 
-   This will install both pre-commit hooks (run on commit) and pre-push hooks (run before pushing to GitHub).
+   # Set up post-merge hook (optional but recommended)
+   ./scripts/setup_post_merge_hook.sh
+   ```
 
 4. Verify your local environment:
    ```bash
@@ -242,15 +266,23 @@ Contributions are welcome! Here's how you can contribute:
    ./scripts/verify_local_checks.sh
    ```
 
-   This script will verify that your local environment is properly set up to catch issues before they reach the CI/CD pipeline.
-
 5. Run the tests:
    ```bash
    ./run_tests.sh
    ```
 
-5. Build the documentation:
+6. Build the documentation:
    ```bash
    cd docs && make html
    ```
    Then open `docs/build/html/index.html` in your browser.
+
+### Understanding Git Hooks
+
+This project uses several types of Git hooks to maintain code quality:
+
+- **Pre-commit hooks**: Run automatically when you commit code to check formatting and style
+- **Pre-push hooks**: Run automatically before pushing to catch more serious issues
+- **Post-merge hooks**: Run after pulling/merging to notify you when scripts have changed
+
+If you update any scripts or pull changes that modify scripts, run `./scripts/update_environment.sh` to ensure your hooks are up to date.
