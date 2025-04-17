@@ -42,6 +42,16 @@ if [ $? -ne 0 ]; then
     exit 1
 fi
 
+# Check if documentation builds
+echo "Checking if documentation builds..."
+cd docs && make html > /dev/null 2>&1
+DOCS_RESULT=$?
+cd ..
+if [ $DOCS_RESULT -ne 0 ]; then
+    echo "WARNING: Documentation build failed. This won't block your push, but should be fixed eventually."
+    # Don't exit with error since we're allowing this to fail for now
+fi
+
 # Run a subset of pre-commit hooks that should pass
 echo "Running critical pre-commit hooks..."
 SKIP=bandit,pydocstyle pre-commit run --all-files

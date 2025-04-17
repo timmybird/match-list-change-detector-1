@@ -86,7 +86,8 @@ jobs:
 
     - name: Build documentation
       run: |
-        cd docs && make html || true
+        cd docs && make html || echo "Documentation build failed but continuing anyway"
+      continue-on-error: true  # Don't fail the build for now
 
     - name: Upload documentation
       uses: actions/upload-artifact@v3

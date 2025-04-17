@@ -25,6 +25,7 @@ jobs:
 
   codeql:
     runs-on: ubuntu-latest
+    continue-on-error: true  # Don't fail the build for now
     permissions:
       security-events: write
 

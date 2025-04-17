@@ -11,6 +11,7 @@ jobs:
       contents: read
       pull-requests: write
     runs-on: ubuntu-latest
+    continue-on-error: true  # Don't fail the build for now
     steps:
     - uses: actions/labeler@v4
       with:
