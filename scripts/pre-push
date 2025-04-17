@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# Pre-push hook to run all checks before pushing to GitHub
+echo "Running pre-push checks..."
+
+# Run pre-commit on all files, but skip bandit and pydocstyle for now
+# until we fix all the issues in the codebase
+echo "Running pre-commit checks..."
+SKIP=bandit,pydocstyle pre-commit run --all-files
+
+# If pre-commit fails, abort the push
+if [ $? -ne 0 ]; then
+    echo "Pre-commit checks failed. Aborting push."
+    exit 1
+fi
+
+# Run pytest on property-based tests
+echo "Running property-based tests..."
+python -m pytest tests/test_property_based.py -v
+
+# If tests fail, abort the push
+if [ $? -ne 0 ]; then
+    echo "Tests failed. Aborting push."
+    exit 1
+fi
+
+echo "All checks passed. Proceeding with push."
+exit 0

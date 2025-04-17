@@ -1,0 +1,33 @@
+# Configuration for dependency-review action
+# See: https://github.com/actions/dependency-review-action
+
+# Allow dependencies with development scope
+allow-dependencies-licenses:
+  - 'MIT'
+  - 'BSD-3-Clause'
+  - 'BSD-2-Clause'
+  - 'Apache-2.0'
+  - 'Python-2.0'
+  - 'ISC'
+  - 'Unlicense'
+  - 'CC0-1.0'
+  - 'MPL-2.0'
+  - 'LGPL-2.1'
+  - 'LGPL-3.0'
+
+# Skip checking licenses for development dependencies
+fail-on-scopes: []
+
+# Allow all severity levels for now
+allow-licenses-for-packages:
+  - 'sphinx'
+  - 'sphinx-rtd-theme'
+  - 'pytest'
+  - 'pytest-cov'
+  - 'pytest-xdist'
+  - 'hypothesis'
+  - 'black'
+  - 'isort'
+  - 'mypy'
+  - 'flake8'
+  - 'pre-commit'

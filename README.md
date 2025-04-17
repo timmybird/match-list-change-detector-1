@@ -104,6 +104,8 @@ python -m unittest discover -s tests
 - `match_list_change_detector.py`: The main Python script that detects changes
 - `config.py`: Configuration management
 - `logging_config.py`: Centralized logging configuration
+- `health_server.py`: Simple health check server
+- `metrics.py`: Prometheus metrics collection
 
 ### Docker Files
 - `Dockerfile`: Containerizes the Python script
@@ -121,6 +123,13 @@ python -m unittest discover -s tests
 - `.env.example`: Example environment variables file
 - `requirements.txt`: Lists the Python dependencies
 - `setup.cfg`: Configuration for development tools (flake8, etc.)
+- `pyproject.toml`: Configuration for Black, isort, and mypy
+- `.pre-commit-config.yaml`: Pre-commit hooks configuration
+
+### Documentation
+- `docs/`: Sphinx documentation
+  - `docs/source/`: Documentation source files
+  - `docs/build/html/`: Generated HTML documentation
 
 ### Tests
 - `tests/`: Directory containing unit tests
@@ -216,7 +225,32 @@ Contributions are welcome! Here's how you can contribute:
    pip install -r requirements.txt
    ```
 
-3. Run the tests:
+3. Install git hooks:
+   ```bash
+   # Install pre-commit hooks
+   pre-commit install
+
+   # Install pre-push hooks
+   ./scripts/install_hooks.sh
+   ```
+
+   This will install both pre-commit hooks (run on commit) and pre-push hooks (run before pushing to GitHub).
+
+4. Verify your local environment:
+   ```bash
+   # Verify that local checks are properly configured
+   ./scripts/verify_local_checks.sh
+   ```
+
+   This script will verify that your local environment is properly set up to catch issues before they reach the CI/CD pipeline.
+
+5. Run the tests:
    ```bash
    ./run_tests.sh
    ```
+
+5. Build the documentation:
+   ```bash
+   cd docs && make html
+   ```
+   Then open `docs/build/html/index.html` in your browser.

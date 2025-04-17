@@ -6,11 +6,11 @@ services:
     environment:
       # Example: Override the log level
       - LOG_LEVEL=DEBUG
-      
+
       # Example: Override the days ahead/back
       # - DAYS_BACK=14
       # - DAYS_AHEAD=90
-    
+
     # Example: Add additional volumes
     # volumes:
     #   - ./custom_config:/app/config

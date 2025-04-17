@@ -1,20 +1,24 @@
 #!/usr/bin/env python3
+"""
+Test script for the match list change detector.
 
-import os
+Allows manual testing of the change detector functionality.
+"""
+
 import json
-from match_list_change_detector import MatchListChangeDetector
+
+from config import get_config
 from logging_config import get_logger
+from match_list_change_detector import MatchListChangeDetector
 
 # Get logger
-logger = get_logger('test_change_detector')
+logger = get_logger("test_change_detector")
 
-# Get configuration
-from config import get_config
 config = get_config()
 
 # Get credentials from configuration
-username = config.get('FOGIS_USERNAME')
-password = config.get('FOGIS_PASSWORD')
+username = config.get("FOGIS_USERNAME")
+password = config.get("FOGIS_PASSWORD")
 
 if not username or not password:
     logger.error("FOGIS_USERNAME and FOGIS_PASSWORD must be set in configuration")
@@ -29,19 +33,25 @@ if detector.fetch_current_matches():
     logger.info(f"Successfully fetched {len(detector.current_matches)} matches")
 
     # Save a sample of the matches for inspection
-    sample_matches = detector.current_matches[:3] if len(detector.current_matches) >= 3 else detector.current_matches
-    with open('sample_matches.json', 'w') as f:
+    sample_matches = (
+        detector.current_matches[:3]
+        if len(detector.current_matches) >= 3
+        else detector.current_matches
+    )
+    with open("sample_matches.json", "w") as f:
         json.dump(sample_matches, f, indent=2)
     logger.info("Saved sample matches to sample_matches.json")
 
     # Print sample match details
     for i, match in enumerate(sample_matches):
-        match_date = match.get('matchdatum', 'Unknown date')
-        match_time = match.get('matchtid', 'Unknown time')
-        home_team = match.get('hemmalag', 'Unknown home team')
-        away_team = match.get('bortalag', 'Unknown away team')
-        arena = match.get('arena', 'Unknown arena')
-        logger.info(f"Match {i+1}: {match_date} {match_time} - {home_team} vs {away_team} at {arena}")
+        match_date = match.get("matchdatum", "Unknown date")
+        match_time = match.get("matchtid", "Unknown time")
+        home_team = match.get("hemmalag", "Unknown home team")
+        away_team = match.get("bortalag", "Unknown away team")
+        arena = match.get("arena", "Unknown arena")
+        logger.info(
+            f"Match {i+1}: {match_date} {match_time} - {home_team} vs {away_team} at {arena}"
+        )
 else:
     logger.error("Failed to fetch matches")
     exit(1)
@@ -50,7 +60,7 @@ else:
 logger.info("Testing change detection...")
 
 # First, save current matches as previous matches
-with open('previous_matches_test.json', 'w') as f:
+with open("previous_matches_test.json", "w") as f:
     json.dump(detector.current_matches, f, indent=2)
 logger.info("Saved current matches as previous matches")
 
@@ -61,7 +71,7 @@ if detector.current_matches:
 
     # Modify the first match
     if modified_matches:
-        modified_matches[0]['avsparkstid'] = '19:30'  # Change the match time
+        modified_matches[0]["avsparkstid"] = "19:30"  # Change the match time
         logger.info(f"Modified match time for match ID: {modified_matches[0]['matchid']}")
 
     # Save the previous matches

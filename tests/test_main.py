@@ -1,18 +1,25 @@
 #!/usr/bin/env python3
+"""
+Tests for the main function of the match list change detector.
+
+Verifies that the main function works correctly under various conditions.
+"""
 
 import unittest
-from unittest.mock import patch, MagicMock
+from unittest.mock import MagicMock, patch
 
-# Import the main function
-from match_list_change_detector import main
+# Mock the imports that would cause issues
+with patch("sys.modules", {"fogis_api_client": MagicMock()}):
+    # Now import the main function
+    from match_list_change_detector import main
 
 
 class TestMain(unittest.TestCase):
     """Test cases for the main function."""
 
-    @patch('match_list_change_detector.FOGIS_USERNAME', 'test_user')
-    @patch('match_list_change_detector.FOGIS_PASSWORD', 'test_pass')
-    @patch('match_list_change_detector.MatchListChangeDetector')
+    @patch("match_list_change_detector.FOGIS_USERNAME", "test_user")
+    @patch("match_list_change_detector.FOGIS_PASSWORD", "test_pass")
+    @patch("match_list_change_detector.MatchListChangeDetector")
     def test_main_success(self, mock_detector_class):
         """Test the main function with successful execution."""
         # Set up the mock
@@ -25,12 +32,12 @@ class TestMain(unittest.TestCase):
 
         # Verify the result
         self.assertTrue(result)
-        mock_detector_class.assert_called_once_with('test_user', 'test_pass')
+        mock_detector_class.assert_called_once_with("test_user", "test_pass")
         mock_detector.run.assert_called_once()
 
-    @patch('match_list_change_detector.FOGIS_USERNAME', 'test_user')
-    @patch('match_list_change_detector.FOGIS_PASSWORD', 'test_pass')
-    @patch('match_list_change_detector.MatchListChangeDetector')
+    @patch("match_list_change_detector.FOGIS_USERNAME", "test_user")
+    @patch("match_list_change_detector.FOGIS_PASSWORD", "test_pass")
+    @patch("match_list_change_detector.MatchListChangeDetector")
     def test_main_failure(self, mock_detector_class):
         """Test the main function with a failure."""
         # Set up the mock
@@ -44,8 +51,8 @@ class TestMain(unittest.TestCase):
         # Verify the result
         self.assertFalse(result)
 
-    @patch('match_list_change_detector.FOGIS_USERNAME', '')
-    @patch('match_list_change_detector.FOGIS_PASSWORD', '')
+    @patch("match_list_change_detector.FOGIS_USERNAME", "")
+    @patch("match_list_change_detector.FOGIS_PASSWORD", "")
     def test_main_missing_credentials(self):
         """Test the main function with missing credentials."""
         # Run the main function
@@ -55,5 +62,5 @@ class TestMain(unittest.TestCase):
         self.assertFalse(result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()
