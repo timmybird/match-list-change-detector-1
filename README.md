@@ -236,7 +236,15 @@ Contributions are welcome! Here's how you can contribute:
 
    This will install both pre-commit hooks (run on commit) and pre-push hooks (run before pushing to GitHub).
 
-4. Run the tests:
+4. Verify your local environment:
+   ```bash
+   # Verify that local checks are properly configured
+   ./scripts/verify_local_checks.sh
+   ```
+
+   This script will verify that your local environment is properly set up to catch issues before they reach the CI/CD pipeline.
+
+5. Run the tests:
    ```bash
    ./run_tests.sh
    ```
