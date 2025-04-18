@@ -27,6 +27,14 @@ DEFAULT_CONFIG = {
     "CONTAINER_NETWORK": "fogis-network",
     # Timezone
     "TZ": "Europe/Stockholm",
+    # Security configuration
+    "USE_HTTPS": False,
+    "SSL_CERT_FILE": "certs/server.crt",
+    "SSL_KEY_FILE": "certs/server.key",
+    "HEALTH_SERVER_PORT": 8000,
+    "METRICS_SERVER_PORT": 8001,
+    # Rate limiting
+    "API_RATE_LIMIT": 10,  # Maximum number of API requests per minute
 }
 
 

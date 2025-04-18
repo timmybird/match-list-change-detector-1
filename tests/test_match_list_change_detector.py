@@ -16,6 +16,8 @@ from unittest.mock import MagicMock, patch
 # Mock the imports that would cause issues
 with patch("sys.modules", {"fogis_api_client": MagicMock()}):
     # Now import the module to test
+    from pathlib import Path
+
     from match_list_change_detector import PREVIOUS_MATCHES_FILE, MatchListChangeDetector
 
 
@@ -282,12 +284,16 @@ class TestMatchListChangeDetector(unittest.TestCase):
         self.assertEqual(changes["changed_matches"], 0)
 
     @patch("match_list_change_detector.subprocess.run")
-    def test_trigger_docker_compose_success(self, mock_run):
+    @patch("match_list_change_detector.get_executable_path")
+    @patch("match_list_change_detector.validate_file_path")
+    def test_trigger_docker_compose_success(self, mock_validate, mock_get_exec, mock_run):
         """Test triggering docker-compose successfully."""
-        # Set up the mock
+        # Set up the mocks
         mock_process = MagicMock()
         mock_process.returncode = 0
         mock_run.return_value = mock_process
+        mock_get_exec.return_value = "/usr/bin/docker-compose"
+        mock_validate.return_value = Path("match_changes.json")
 
         # Create a changes dictionary
         changes = {
@@ -304,17 +310,22 @@ class TestMatchListChangeDetector(unittest.TestCase):
 
         # Verify the result
         self.assertTrue(result)
-        self.assertTrue(os.path.exists("match_changes.json"))
+        mock_validate.assert_called()
+        mock_get_exec.assert_called_once_with("docker-compose")
         mock_run.assert_called_once()
 
     @patch("match_list_change_detector.subprocess.run")
-    def test_trigger_docker_compose_failure(self, mock_run):
+    @patch("match_list_change_detector.get_executable_path")
+    @patch("match_list_change_detector.validate_file_path")
+    def test_trigger_docker_compose_failure(self, mock_validate, mock_get_exec, mock_run):
         """Test triggering docker-compose with a failure."""
-        # Set up the mock
+        # Set up the mocks
         mock_process = MagicMock()
         mock_process.returncode = 1
         mock_process.stderr = "Error"
         mock_run.return_value = mock_process
+        mock_get_exec.return_value = "/usr/bin/docker-compose"
+        mock_validate.return_value = Path("match_changes.json")
 
         # Create a changes dictionary
         changes = {
@@ -333,10 +344,14 @@ class TestMatchListChangeDetector(unittest.TestCase):
         self.assertFalse(result)
 
     @patch("match_list_change_detector.subprocess.run")
-    def test_trigger_docker_compose_timeout(self, mock_run):
+    @patch("match_list_change_detector.get_executable_path")
+    @patch("match_list_change_detector.validate_file_path")
+    def test_trigger_docker_compose_timeout(self, mock_validate, mock_get_exec, mock_run):
         """Test triggering docker-compose with a timeout."""
-        # Set up the mock to raise a timeout exception
+        # Set up the mocks
         mock_run.side_effect = subprocess.TimeoutExpired(cmd="docker-compose", timeout=30)
+        mock_get_exec.return_value = "/usr/bin/docker-compose"
+        mock_validate.return_value = Path("match_changes.json")
 
         # Create a changes dictionary
         changes = {

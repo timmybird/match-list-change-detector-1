@@ -37,7 +37,7 @@ repos:
     rev: 1.7.5
     hooks:
     -   id: bandit
-        args: ['-x', './tests,./venv,./.venv,./stubs,./docs', '-s', 'B101,B104,B105,B110,B311']
+        args: ['-x', './tests,./venv,./.venv,./stubs,./docs']
         exclude: ^tests/
 
 -   repo: https://github.com/pycqa/pydocstyle

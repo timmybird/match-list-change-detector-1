@@ -15,6 +15,18 @@ This application:
 4. If changes are detected, triggers a docker-compose file to handle the changes
 5. Saves the current matches for future comparisons
 
+## Security
+
+This application follows security best practices:
+- Uses absolute paths for executables to prevent path traversal attacks
+- Validates all file paths to prevent directory traversal attacks
+- Implements secure credential handling with password masking in logs
+- Supports HTTPS for health and metrics servers
+- Implements rate limiting for API requests
+- Adds security headers to HTTP responses
+- Implements proper error handling and logging
+- Runs regular security scans with bandit
+
 ## Requirements
 
 - Docker and Docker Compose

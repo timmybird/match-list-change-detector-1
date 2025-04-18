@@ -11,10 +11,10 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.9'
         cache: 'pip'
@@ -27,7 +27,7 @@ jobs:
 
     - name: Lint with pre-commit
       run: |
-        SKIP=bandit,pydocstyle pre-commit run --all-files
+        SKIP=pydocstyle pre-commit run --all-files
       continue-on-error: true  # Don't fail the build for now
 
   test:
@@ -37,10 +37,10 @@ jobs:
         python-version: [3.9, '3.10', '3.11']
 
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: ${{ matrix.python-version }}
         cache: 'pip'
@@ -61,7 +61,7 @@ jobs:
         FOGIS_PASSWORD: test_pass
 
     - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
+      uses: codecov/codecov-action@v4
       with:
         file: ./coverage.xml
         fail_ci_if_error: false
@@ -70,10 +70,10 @@ jobs:
     runs-on: ubuntu-latest
     continue-on-error: true  # Don't fail the build for now
     steps:
-    - uses: actions/checkout@v3
+    - uses: actions/checkout@v4
 
     - name: Set up Python
-      uses: actions/setup-python@v4
+      uses: actions/setup-python@v5
       with:
         python-version: '3.9'
         cache: 'pip'
@@ -90,7 +90,7 @@ jobs:
       continue-on-error: true  # Don't fail the build for now
 
     - name: Upload documentation
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: documentation
         path: docs/build/html/
