@@ -72,6 +72,40 @@ This project follows the Gitflow workflow:
 - **Feature Request**: For suggesting enhancements
 - **Task**: For general tasks
 
+### Starting Work on an Issue
+
+When you decide to work on an issue, follow these steps:
+
+1. **Claim the Issue**:
+   - Comment on the issue to let others know you're working on it
+   - Ask for any clarification needed before starting
+
+2. **Create a Feature Branch**:
+   ```bash
+   git checkout develop
+   git pull  # Ensure you have the latest changes
+   git checkout -b feature/issue-NUMBER-short-description
+   ```
+   - Replace `NUMBER` with the issue number
+   - Add a brief description of the issue in the branch name
+
+3. **Set Up Your Environment**:
+   - Install required dependencies
+   - Run tests to ensure everything works before making changes
+   ```bash
+   pip install -r requirements.txt
+   python -m unittest discover tests
+   ```
+
+4. **Plan Your Changes**:
+   - Create a brief plan of the changes you'll make
+   - Consider breaking down complex issues into smaller tasks
+
+5. **Update the Issue**:
+   - Add comments to the issue with your plan
+   - Provide regular updates on your progress
+   - Mention any challenges or design decisions
+
 ## Pull Request Process
 
 1. **Create a PR**:
@@ -91,6 +125,11 @@ This project follows the Gitflow workflow:
    - Squash and merge feature branches
    - Use merge commits for release branches
    - Delete branches after merging
+
+5. **Completing the Issue**:
+   - After your PR is merged, close the related issue if it wasn't automatically closed
+   - Add a final comment summarizing the changes made
+   - Update any related documentation or issues
 
 ## Coding Standards
 
@@ -121,6 +160,15 @@ AI agents contributing to this project should follow these additional guidelines
 - **Follow project conventions**: Observe existing patterns in the codebase
 - **Plan before coding**: Create a detailed plan before making changes
 - **Verify your understanding**: Confirm your understanding of requirements with the user
+
+### Working on Issues as an AI Assistant
+
+- **Acknowledge the issue**: When asked to work on an issue, acknowledge it and confirm your understanding
+- **Follow the issue workflow**: Follow the "Starting Work on an Issue" steps outlined above
+- **Create proper branches**: Use the correct branch naming convention (`feature/issue-NUMBER-description`)
+- **Document your process**: Explain your thought process and decisions as you work
+- **Provide progress updates**: Keep the user informed about your progress and any challenges
+- **Ask for clarification**: Don't hesitate to ask questions if requirements are unclear
 
 ### Issue and Branch Management
 
