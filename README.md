@@ -286,3 +286,12 @@ This project uses several types of Git hooks to maintain code quality:
 - **Post-merge hooks**: Run after pulling/merging to notify you when scripts have changed
 
 If you update any scripts or pull changes that modify scripts, run `./scripts/update_environment.sh` to ensure your hooks are up to date.
+
+### Script Versioning and Future Updates
+
+Our setup scripts use a version system to track compatibility:
+
+- **Current Version**: 1.0 (Some checks are skipped due to known issues)
+- **Future Version**: 2.0 (Will enable all checks after issues #3, #4, and #5 are complete)
+
+The scripts will warn you if they detect a version mismatch. After issues #3, #4, and #5 are complete, we'll update the scripts to version 2.0 (tracked in [issue #6](https://github.com/timmybird/match-list-change-detector/issues/6)).

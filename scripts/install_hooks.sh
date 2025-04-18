@@ -1,6 +1,30 @@
 #!/bin/bash
 
 # Script to install git hooks
+
+# Version tracking
+SCRIPT_VERSION="1.0"
+REQUIRED_VERSION="1.0"
+
+# This version will be updated to 2.0 after issues #3, #4, and #5 are complete
+# See issue #6: https://github.com/timmybird/match-list-change-detector/issues/6
+
+# Version check
+if [ "$SCRIPT_VERSION" != "$REQUIRED_VERSION" ]; then
+    echo "⚠️  WARNING: This script (version $SCRIPT_VERSION) may be outdated! ⚠️"
+    echo "The required version is $REQUIRED_VERSION."
+    echo "Please check for updates in the repository."
+    echo "See issue #6: https://github.com/timmybird/match-list-change-detector/issues/6"
+    echo ""
+    read -p "Do you want to continue anyway? (y/n) " -n 1 -r
+    echo ""
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+        echo "Exiting. Please update the script first."
+        exit 1
+    fi
+    echo "Continuing with the current version..."
+fi
+
 echo "Installing git hooks..."
 
 # Create scripts directory if it doesn't exist
