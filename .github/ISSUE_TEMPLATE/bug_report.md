@@ -28,3 +28,12 @@ If applicable, add logs to help explain your problem.
 
 **Additional context**
 Add any other context about the problem here.
+
+## Contributing Guidelines
+Please follow the project's [CONTRIBUTING.md](https://github.com/timmybird/match-list-change-detector/blob/develop/CONTRIBUTING.md) guidelines when working on this issue.
+
+Key points:
+- Follow the Gitflow workflow (feature branches from develop)
+- Write tests that verify the bug fix
+- Ensure code passes all pre-commit hooks
+- Use descriptive commit messages

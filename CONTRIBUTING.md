@@ -114,18 +114,37 @@ This project follows the Gitflow workflow:
 
 AI agents contributing to this project should follow these additional guidelines:
 
+### First Steps for AI Assistants
+
+- **Read this document first**: Always review CONTRIBUTING.md before starting work
+- **Understand the codebase**: Use tools like `codebase-retrieval` to understand the project structure
+- **Follow project conventions**: Observe existing patterns in the codebase
+- **Plan before coding**: Create a detailed plan before making changes
+- **Verify your understanding**: Confirm your understanding of requirements with the user
+
 ### Issue and Branch Management
 
 - **Always close issues**: When a PR resolves an issue, explicitly mention "Closes #123" in the PR description
 - **Clean up branches**: Delete feature branches after merging PRs
 - **Link related PRs**: If replacing one PR with another, reference the original PR and explain why
 - **Track open work**: Maintain awareness of open issues and PRs you've created
+- **Use proper branch naming**: Follow the Gitflow naming conventions (feature/, bugfix/, etc.)
+
+### Code Quality and Testing
+
+- **Run pre-commit hooks**: Ensure all pre-commit hooks pass before submitting code
+- **Write tests**: Add tests for all new functionality and bug fixes
+- **Document your code**: Add docstrings and comments to explain complex logic
+- **Follow type hints**: Use proper type annotations for all functions and methods
+- **Handle errors gracefully**: Implement proper error handling and logging
 
 ### Communication
 
 - **Be explicit**: Clearly state what changes you're making and why
 - **Document decisions**: Explain your reasoning, especially for non-obvious choices
 - **Provide context**: Reference relevant documentation or discussions
+- **Ask questions**: When uncertain, ask for clarification rather than making assumptions
+- **Explain limitations**: Be transparent about any limitations in your approach
 
 ### GitHub CLI Usage
 
@@ -147,11 +166,21 @@ AI agents contributing to this project should follow these additional guidelines
 - **Use structured format**: Follow the PR template
 - **Include testing instructions**: Explain how to test the changes
 - **List dependencies**: Mention any new dependencies or requirements
+- **Reference issues**: Always link to related issues
+- **Describe security implications**: Note any security considerations
+
+### Security Considerations
+
+- **Validate inputs**: Always validate user inputs and file paths
+- **Use secure coding practices**: Follow security best practices
+- **Consider edge cases**: Think about potential security implications
+- **Report security concerns**: Highlight any security issues you identify
 
 ### Continuous Improvement
 
 - **Learn from feedback**: Incorporate feedback into future contributions
 - **Adapt to project conventions**: Follow established patterns in the codebase
 - **Suggest improvements**: Identify opportunities to improve the contribution process
+- **Document your learnings**: Share insights that might help future contributors
 
 By following these guidelines, both human and AI contributors can work together effectively to improve the Match List Change Detector project.
