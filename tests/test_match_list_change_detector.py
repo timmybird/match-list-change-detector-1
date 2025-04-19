@@ -1,17 +1,24 @@
 #!/usr/bin/env python3
+"""
+Tests for the match list change detector.
 
-import os
+Verifies that the change detector correctly identifies changes in match lists.
+"""
+
 import json
-import unittest
-import subprocess
-from unittest.mock import patch, MagicMock
-import tempfile
+import os
 import shutil
+import subprocess
+import tempfile
+import unittest
+from unittest.mock import MagicMock, patch
 
-# Import the module to test
-from match_list_change_detector import (
-    MatchListChangeDetector, PREVIOUS_MATCHES_FILE
-)
+# Mock the imports that would cause issues
+with patch("sys.modules", {"fogis_api_client": MagicMock()}):
+    # Now import the module to test
+    from pathlib import Path
+
+    from match_list_change_detector import PREVIOUS_MATCHES_FILE, MatchListChangeDetector
 
 
 class TestMatchListChangeDetector(unittest.TestCase):
@@ -44,9 +51,9 @@ class TestMatchListChangeDetector(unittest.TestCase):
                     "personnamn": "Bartek Svaberg",
                     "domarrollnamn": "Huvuddomare",
                     "epostadress": "bartek.svaberg@gmail.com",
-                    "mobiltelefon": "0709423055"
+                    "mobiltelefon": "0709423055",
                 }
-            ]
+            ],
         }
 
         # Create a detector instance with mocked API client
@@ -63,7 +70,7 @@ class TestMatchListChangeDetector(unittest.TestCase):
         """Test loading previous matches when the file exists."""
         # Create a sample previous matches file
         sample_matches = [self.sample_match]
-        with open(PREVIOUS_MATCHES_FILE, 'w') as f:
+        with open(PREVIOUS_MATCHES_FILE, "w") as f:
             json.dump(sample_matches, f)
 
         # Load the previous matches
@@ -72,7 +79,7 @@ class TestMatchListChangeDetector(unittest.TestCase):
         # Verify the result
         self.assertTrue(result)
         self.assertEqual(len(self.detector.previous_matches), 1)
-        self.assertEqual(self.detector.previous_matches[0]['matchid'], 6169105)
+        self.assertEqual(self.detector.previous_matches[0]["matchid"], 6169105)
 
     def test_load_previous_matches_file_not_exists(self):
         """Test loading previous matches when the file doesn't exist."""
@@ -100,12 +107,12 @@ class TestMatchListChangeDetector(unittest.TestCase):
         self.assertTrue(os.path.exists(PREVIOUS_MATCHES_FILE))
 
         # Verify the file contents
-        with open(PREVIOUS_MATCHES_FILE, 'r') as f:
+        with open(PREVIOUS_MATCHES_FILE, "r") as f:
             saved_matches = json.load(f)
         self.assertEqual(len(saved_matches), 1)
-        self.assertEqual(saved_matches[0]['matchid'], 6169105)
+        self.assertEqual(saved_matches[0]["matchid"], 6169105)
 
-    @patch('match_list_change_detector.MatchListFilter')
+    @patch("match_list_change_detector.MatchListFilter")
     def test_fetch_current_matches_success(self, mock_match_list_filter):
         """Test fetching current matches successfully."""
         # Set up the mock
@@ -121,14 +128,13 @@ class TestMatchListChangeDetector(unittest.TestCase):
         # Verify the result
         self.assertTrue(result)
         self.assertEqual(len(self.detector.current_matches), 1)
-        self.assertEqual(self.detector.current_matches[0]['matchid'], 6169105)
+        self.assertEqual(self.detector.current_matches[0]["matchid"], 6169105)
 
         # Verify the API client was used correctly
         self.api_client_mock.login.assert_called_once()
-        mock_filter_instance.fetch_filtered_matches.assert_called_once_with(
-            self.api_client_mock)
+        mock_filter_instance.fetch_filtered_matches.assert_called_once_with(self.api_client_mock)
 
-    @patch('match_list_change_detector.MatchListFilter')
+    @patch("match_list_change_detector.MatchListFilter")
     def test_fetch_current_matches_failure(self, mock_match_list_filter):
         """Test fetching current matches with a failure."""
         # Set up the mock to raise an exception
@@ -152,8 +158,8 @@ class TestMatchListChangeDetector(unittest.TestCase):
 
         # Verify the result
         self.assertTrue(has_changes)
-        self.assertEqual(changes['new_matches'], 1)
-        self.assertIn('message', changes)
+        self.assertEqual(changes["new_matches"], 1)
+        self.assertIn("message", changes)
 
     def test_detect_changes_new_match(self):
         """Test detecting a new match."""
@@ -163,7 +169,7 @@ class TestMatchListChangeDetector(unittest.TestCase):
 
         # Add a previous match with a different ID
         prev_match = self.sample_match.copy()
-        prev_match['matchid'] = 6169106
+        prev_match["matchid"] = 6169106
         self.detector.previous_matches = [prev_match]
 
         # Detect changes
@@ -171,10 +177,10 @@ class TestMatchListChangeDetector(unittest.TestCase):
 
         # Verify the result
         self.assertTrue(has_changes)
-        self.assertEqual(changes['new_matches'], 1)
-        self.assertEqual(changes['removed_matches'], 1)
-        self.assertEqual(len(changes['new_match_details']), 1)
-        self.assertEqual(len(changes['removed_match_details']), 1)
+        self.assertEqual(changes["new_matches"], 1)
+        self.assertEqual(changes["removed_matches"], 1)
+        self.assertEqual(len(changes["new_match_details"]), 1)
+        self.assertEqual(len(changes["removed_match_details"]), 1)
 
     def test_detect_changes_removed_match(self):
         """Test detecting a removed match."""
@@ -187,10 +193,10 @@ class TestMatchListChangeDetector(unittest.TestCase):
 
         # Verify the result
         self.assertTrue(has_changes)
-        self.assertEqual(changes['new_matches'], 0)
-        self.assertEqual(changes['removed_matches'], 1)
-        self.assertEqual(len(changes['new_match_details']), 0)
-        self.assertEqual(len(changes['removed_match_details']), 1)
+        self.assertEqual(changes["new_matches"], 0)
+        self.assertEqual(changes["removed_matches"], 1)
+        self.assertEqual(len(changes["new_match_details"]), 0)
+        self.assertEqual(len(changes["removed_match_details"]), 1)
 
     def test_detect_changes_time_change(self):
         """Test detecting a change in match time."""
@@ -199,7 +205,7 @@ class TestMatchListChangeDetector(unittest.TestCase):
 
         # Create a current match with a different time
         current_match = self.sample_match.copy()
-        current_match['avsparkstid'] = "15:00"
+        current_match["avsparkstid"] = "15:00"
         self.detector.current_matches = [current_match]
 
         # Detect changes
@@ -207,13 +213,13 @@ class TestMatchListChangeDetector(unittest.TestCase):
 
         # Verify the result
         self.assertTrue(has_changes)
-        self.assertEqual(changes['new_matches'], 0)
-        self.assertEqual(changes['removed_matches'], 0)
-        self.assertEqual(changes['changed_matches'], 1)
-        self.assertEqual(len(changes['changed_match_details']), 1)
-        self.assertEqual(changes['changed_match_details'][0]['previous']['time'], "14:00")
-        self.assertEqual(changes['changed_match_details'][0]['current']['time'], "15:00")
-        self.assertTrue(changes['changed_match_details'][0]['changes']['basic'])
+        self.assertEqual(changes["new_matches"], 0)
+        self.assertEqual(changes["removed_matches"], 0)
+        self.assertEqual(changes["changed_matches"], 1)
+        self.assertEqual(len(changes["changed_match_details"]), 1)
+        self.assertEqual(changes["changed_match_details"][0]["previous"]["time"], "14:00")
+        self.assertEqual(changes["changed_match_details"][0]["current"]["time"], "15:00")
+        self.assertTrue(changes["changed_match_details"][0]["changes"]["basic"])
 
     def test_detect_changes_venue_change(self):
         """Test detecting a change in match venue."""
@@ -222,7 +228,7 @@ class TestMatchListChangeDetector(unittest.TestCase):
 
         # Create a current match with a different venue
         current_match = self.sample_match.copy()
-        current_match['anlaggningnamn'] = "New Venue"
+        current_match["anlaggningnamn"] = "New Venue"
         self.detector.current_matches = [current_match]
 
         # Detect changes
@@ -230,12 +236,11 @@ class TestMatchListChangeDetector(unittest.TestCase):
 
         # Verify the result
         self.assertTrue(has_changes)
-        self.assertEqual(changes['changed_matches'], 1)
+        self.assertEqual(changes["changed_matches"], 1)
         self.assertEqual(
-            changes['changed_match_details'][0]['previous']['venue'],
-            "Kongevi 1 Konstgräs"
+            changes["changed_match_details"][0]["previous"]["venue"], "Kongevi 1 Konstgräs"
         )
-        self.assertEqual(changes['changed_match_details'][0]['current']['venue'], "New Venue")
+        self.assertEqual(changes["changed_match_details"][0]["current"]["venue"], "New Venue")
 
     def test_detect_changes_referee_change(self):
         """Test detecting a change in match referees."""
@@ -244,13 +249,13 @@ class TestMatchListChangeDetector(unittest.TestCase):
 
         # Create a current match with a different referee
         current_match = self.sample_match.copy()
-        current_match['domaruppdraglista'] = [
+        current_match["domaruppdraglista"] = [
             {
                 "domareid": 7700,  # Different referee ID
                 "personnamn": "Another Referee",
                 "domarrollnamn": "Huvuddomare",
                 "epostadress": "another@example.com",
-                "mobiltelefon": "1234567890"
+                "mobiltelefon": "1234567890",
             }
         ]
         self.detector.current_matches = [current_match]
@@ -260,8 +265,8 @@ class TestMatchListChangeDetector(unittest.TestCase):
 
         # Verify the result
         self.assertTrue(has_changes)
-        self.assertEqual(changes['changed_matches'], 1)
-        self.assertTrue(changes['changed_match_details'][0]['changes']['referees'])
+        self.assertEqual(changes["changed_matches"], 1)
+        self.assertTrue(changes["changed_match_details"][0]["changes"]["referees"])
 
     def test_detect_changes_no_changes(self):
         """Test detecting no changes."""
@@ -274,26 +279,30 @@ class TestMatchListChangeDetector(unittest.TestCase):
 
         # Verify the result
         self.assertFalse(has_changes)
-        self.assertEqual(changes['new_matches'], 0)
-        self.assertEqual(changes['removed_matches'], 0)
-        self.assertEqual(changes['changed_matches'], 0)
+        self.assertEqual(changes["new_matches"], 0)
+        self.assertEqual(changes["removed_matches"], 0)
+        self.assertEqual(changes["changed_matches"], 0)
 
-    @patch('match_list_change_detector.subprocess.run')
-    def test_trigger_docker_compose_success(self, mock_run):
+    @patch("match_list_change_detector.subprocess.run")
+    @patch("match_list_change_detector.get_executable_path")
+    @patch("match_list_change_detector.validate_file_path")
+    def test_trigger_docker_compose_success(self, mock_validate, mock_get_exec, mock_run):
         """Test triggering docker-compose successfully."""
-        # Set up the mock
+        # Set up the mocks
         mock_process = MagicMock()
         mock_process.returncode = 0
         mock_run.return_value = mock_process
+        mock_get_exec.return_value = "/usr/bin/docker-compose"
+        mock_validate.return_value = Path("match_changes.json")
 
         # Create a changes dictionary
         changes = {
-            'new_matches': 1,
-            'removed_matches': 0,
-            'changed_matches': 0,
-            'new_match_details': [self.sample_match],
-            'removed_match_details': [],
-            'changed_match_details': []
+            "new_matches": 1,
+            "removed_matches": 0,
+            "changed_matches": 0,
+            "new_match_details": [self.sample_match],
+            "removed_match_details": [],
+            "changed_match_details": [],
         }
 
         # Trigger docker-compose
@@ -301,26 +310,31 @@ class TestMatchListChangeDetector(unittest.TestCase):
 
         # Verify the result
         self.assertTrue(result)
-        self.assertTrue(os.path.exists('match_changes.json'))
+        mock_validate.assert_called()
+        mock_get_exec.assert_called_once_with("docker-compose")
         mock_run.assert_called_once()
 
-    @patch('match_list_change_detector.subprocess.run')
-    def test_trigger_docker_compose_failure(self, mock_run):
+    @patch("match_list_change_detector.subprocess.run")
+    @patch("match_list_change_detector.get_executable_path")
+    @patch("match_list_change_detector.validate_file_path")
+    def test_trigger_docker_compose_failure(self, mock_validate, mock_get_exec, mock_run):
         """Test triggering docker-compose with a failure."""
-        # Set up the mock
+        # Set up the mocks
         mock_process = MagicMock()
         mock_process.returncode = 1
         mock_process.stderr = "Error"
         mock_run.return_value = mock_process
+        mock_get_exec.return_value = "/usr/bin/docker-compose"
+        mock_validate.return_value = Path("match_changes.json")
 
         # Create a changes dictionary
         changes = {
-            'new_matches': 1,
-            'removed_matches': 0,
-            'changed_matches': 0,
-            'new_match_details': [self.sample_match],
-            'removed_match_details': [],
-            'changed_match_details': []
+            "new_matches": 1,
+            "removed_matches": 0,
+            "changed_matches": 0,
+            "new_match_details": [self.sample_match],
+            "removed_match_details": [],
+            "changed_match_details": [],
         }
 
         # Trigger docker-compose
@@ -329,21 +343,24 @@ class TestMatchListChangeDetector(unittest.TestCase):
         # Verify the result
         self.assertFalse(result)
 
-    @patch('match_list_change_detector.subprocess.run')
-    def test_trigger_docker_compose_timeout(self, mock_run):
+    @patch("match_list_change_detector.subprocess.run")
+    @patch("match_list_change_detector.get_executable_path")
+    @patch("match_list_change_detector.validate_file_path")
+    def test_trigger_docker_compose_timeout(self, mock_validate, mock_get_exec, mock_run):
         """Test triggering docker-compose with a timeout."""
-        # Set up the mock to raise a timeout exception
-        mock_run.side_effect = subprocess.TimeoutExpired(
-            cmd="docker-compose", timeout=30)
+        # Set up the mocks
+        mock_run.side_effect = subprocess.TimeoutExpired(cmd="docker-compose", timeout=30)
+        mock_get_exec.return_value = "/usr/bin/docker-compose"
+        mock_validate.return_value = Path("match_changes.json")
 
         # Create a changes dictionary
         changes = {
-            'new_matches': 1,
-            'removed_matches': 0,
-            'changed_matches': 0,
-            'new_match_details': [self.sample_match],
-            'removed_match_details': [],
-            'changed_match_details': []
+            "new_matches": 1,
+            "removed_matches": 0,
+            "changed_matches": 0,
+            "new_match_details": [self.sample_match],
+            "removed_match_details": [],
+            "changed_match_details": [],
         }
 
         # Trigger docker-compose
@@ -352,17 +369,17 @@ class TestMatchListChangeDetector(unittest.TestCase):
         # Verify the result
         self.assertTrue(result)  # Should return True even with a timeout
 
-    @patch.object(MatchListChangeDetector, 'load_previous_matches')
-    @patch.object(MatchListChangeDetector, 'fetch_current_matches')
-    @patch.object(MatchListChangeDetector, 'detect_changes')
-    @patch.object(MatchListChangeDetector, 'trigger_docker_compose')
-    @patch.object(MatchListChangeDetector, 'save_current_matches')
+    @patch.object(MatchListChangeDetector, "load_previous_matches")
+    @patch.object(MatchListChangeDetector, "fetch_current_matches")
+    @patch.object(MatchListChangeDetector, "detect_changes")
+    @patch.object(MatchListChangeDetector, "trigger_docker_compose")
+    @patch.object(MatchListChangeDetector, "save_current_matches")
     def test_run_success(self, mock_save, mock_trigger, mock_detect, mock_fetch, mock_load):
         """Test running the full change detection process successfully."""
         # Set up the mocks
         mock_load.return_value = True
         mock_fetch.return_value = True
-        mock_detect.return_value = (True, {'changes': 'detected'})
+        mock_detect.return_value = (True, {"changes": "detected"})
         mock_trigger.return_value = True
         mock_save.return_value = True
 
@@ -374,20 +391,20 @@ class TestMatchListChangeDetector(unittest.TestCase):
         mock_load.assert_called_once()
         mock_fetch.assert_called_once()
         mock_detect.assert_called_once()
-        mock_trigger.assert_called_once_with({'changes': 'detected'})
+        mock_trigger.assert_called_once_with({"changes": "detected"})
         mock_save.assert_called_once()
 
-    @patch.object(MatchListChangeDetector, 'load_previous_matches')
-    @patch.object(MatchListChangeDetector, 'fetch_current_matches')
-    @patch.object(MatchListChangeDetector, 'detect_changes')
-    @patch.object(MatchListChangeDetector, 'trigger_docker_compose')
-    @patch.object(MatchListChangeDetector, 'save_current_matches')
+    @patch.object(MatchListChangeDetector, "load_previous_matches")
+    @patch.object(MatchListChangeDetector, "fetch_current_matches")
+    @patch.object(MatchListChangeDetector, "detect_changes")
+    @patch.object(MatchListChangeDetector, "trigger_docker_compose")
+    @patch.object(MatchListChangeDetector, "save_current_matches")
     def test_run_no_changes(self, mock_save, mock_trigger, mock_detect, mock_fetch, mock_load):
         """Test running the process with no changes detected."""
         # Set up the mocks
         mock_load.return_value = True
         mock_fetch.return_value = True
-        mock_detect.return_value = (False, {'changes': 'none'})
+        mock_detect.return_value = (False, {"changes": "none"})
 
         # Run the detector
         result = self.detector.run()
@@ -397,8 +414,8 @@ class TestMatchListChangeDetector(unittest.TestCase):
         mock_trigger.assert_not_called()  # Should not trigger docker-compose
         mock_save.assert_called_once()  # Should still save current matches
 
-    @patch.object(MatchListChangeDetector, 'load_previous_matches')
-    @patch.object(MatchListChangeDetector, 'fetch_current_matches')
+    @patch.object(MatchListChangeDetector, "load_previous_matches")
+    @patch.object(MatchListChangeDetector, "fetch_current_matches")
     def test_run_fetch_failure(self, mock_fetch, mock_load):
         """Test running the process with a failure to fetch current matches."""
         # Set up the mocks
@@ -412,5 +429,5 @@ class TestMatchListChangeDetector(unittest.TestCase):
         self.assertFalse(result)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

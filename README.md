@@ -15,6 +15,18 @@ This application:
 4. If changes are detected, triggers a docker-compose file to handle the changes
 5. Saves the current matches for future comparisons
 
+## Security
+
+This application follows security best practices:
+- Uses absolute paths for executables to prevent path traversal attacks
+- Validates all file paths to prevent directory traversal attacks
+- Implements secure credential handling with password masking in logs
+- Supports HTTPS for health and metrics servers
+- Implements rate limiting for API requests
+- Adds security headers to HTTP responses
+- Implements proper error handling and logging
+- Runs regular security scans with bandit
+
 ## Requirements
 
 - Docker and Docker Compose
@@ -104,6 +116,8 @@ python -m unittest discover -s tests
 - `match_list_change_detector.py`: The main Python script that detects changes
 - `config.py`: Configuration management
 - `logging_config.py`: Centralized logging configuration
+- `health_server.py`: Simple health check server
+- `metrics.py`: Prometheus metrics collection
 
 ### Docker Files
 - `Dockerfile`: Containerizes the Python script
@@ -121,6 +135,13 @@ python -m unittest discover -s tests
 - `.env.example`: Example environment variables file
 - `requirements.txt`: Lists the Python dependencies
 - `setup.cfg`: Configuration for development tools (flake8, etc.)
+- `pyproject.toml`: Configuration for Black, isort, and mypy
+- `.pre-commit-config.yaml`: Pre-commit hooks configuration
+
+### Documentation
+- `docs/`: Sphinx documentation
+  - `docs/source/`: Documentation source files
+  - `docs/build/html/`: Generated HTML documentation
 
 ### Tests
 - `tests/`: Directory containing unit tests
@@ -205,6 +226,29 @@ Contributions are welcome! Here's how you can contribute:
 
 ### Development Setup
 
+#### Quick Setup (Recommended)
+
+For a complete setup or when switching computers, use our all-in-one script:
+
+```bash
+# Create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate
+
+# Run the comprehensive setup script
+./scripts/update_environment.sh
+```
+
+This script will:
+- Install all dependencies
+- Set up pre-commit and pre-push hooks
+- Configure a post-merge hook to remind you when scripts change
+- Verify your local environment
+
+#### Manual Setup
+
+If you prefer to set things up manually:
+
 1. Create a virtual environment:
    ```bash
    python -m venv .venv
@@ -216,7 +260,50 @@ Contributions are welcome! Here's how you can contribute:
    pip install -r requirements.txt
    ```
 
-3. Run the tests:
+3. Install git hooks:
+   ```bash
+   # Install pre-commit hooks
+   pre-commit install
+
+   # Install pre-push hooks
+   ./scripts/install_hooks.sh
+
+   # Set up post-merge hook (optional but recommended)
+   ./scripts/setup_post_merge_hook.sh
+   ```
+
+4. Verify your local environment:
+   ```bash
+   # Verify that local checks are properly configured
+   ./scripts/verify_local_checks.sh
+   ```
+
+5. Run the tests:
    ```bash
    ./run_tests.sh
    ```
+
+6. Build the documentation:
+   ```bash
+   cd docs && make html
+   ```
+   Then open `docs/build/html/index.html` in your browser.
+
+### Understanding Git Hooks
+
+This project uses several types of Git hooks to maintain code quality:
+
+- **Pre-commit hooks**: Run automatically when you commit code to check formatting and style
+- **Pre-push hooks**: Run automatically before pushing to catch more serious issues
+- **Post-merge hooks**: Run after pulling/merging to notify you when scripts have changed
+
+If you update any scripts or pull changes that modify scripts, run `./scripts/update_environment.sh` to ensure your hooks are up to date.
+
+### Script Versioning and Future Updates
+
+Our setup scripts use a version system to track compatibility:
+
+- **Current Version**: 1.0 (Some checks are skipped due to known issues)
+- **Future Version**: 2.0 (Will enable all checks after issues #3, #4, and #5 are complete)
+
+The scripts will warn you if they detect a version mismatch. After issues #3, #4, and #5 are complete, we'll update the scripts to version 2.0 (tracked in [issue #6](https://github.com/timmybird/match-list-change-detector/issues/6)).

@@ -22,3 +22,7 @@ Please describe the tests that you ran to verify your changes. Provide instructi
 - [ ] My changes generate no new warnings
 - [ ] I have added tests that prove my fix is effective or that my feature works
 - [ ] New and existing unit tests pass locally with my changes
+- [ ] I have followed the [CONTRIBUTING.md](https://github.com/timmybird/match-list-change-detector/blob/develop/CONTRIBUTING.md) guidelines
+- [ ] I have used the Gitflow workflow (feature branch from develop)
+- [ ] I have run all pre-commit hooks and fixed any issues
+- [ ] I have considered security implications of my changes
