@@ -266,9 +266,21 @@ class MatchListChangeDetector:
             # Apply rate limiting before fetching matches
             self.rate_limiter.wait_for_next_request()
 
-            # Fetch matches
+            # Fetch matches using direct API call (PyPI v0.5.3 compatibility)
             with metrics.time_api_request():
-                self.current_matches = match_filter.fetch_filtered_matches(self.api_client)
+                payload = match_filter.build_payload()
+                api_response = self.api_client.fetch_matches_list_json(filter_params=payload)
+
+                # Handle different response structures from PyPI package
+                if isinstance(api_response, dict) and 'matches' in api_response:
+                    self.current_matches = api_response['matches']
+                elif isinstance(api_response, list):
+                    self.current_matches = api_response
+                else:
+                    logger.error(f"Unexpected API response structure: {type(api_response)}")
+                    logger.debug(f"Response content: {api_response}")
+                    self.current_matches = []
+
             logger.info(f"Successfully fetched {len(self.current_matches)} current matches")
             return True
         except Exception as e:
