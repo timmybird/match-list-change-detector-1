@@ -7,9 +7,10 @@ Scans Docker Compose files and updates timezone environment variables.
 
 import os
 import re
+from typing import List
 
 # List of projects to update
-PROJECTS = [
+PROJECTS: List[str] = [
     "../FogisCalendarPhoneBookSync",
     "../MatchListProcessor",
     "../TeamLogoCombiner",
@@ -18,10 +19,10 @@ PROJECTS = [
 ]
 
 # Timezone to set
-TIMEZONE = "Europe/Stockholm"
+TIMEZONE: str = "Europe/Stockholm"
 
 
-def update_docker_compose(file_path):
+def update_docker_compose(file_path: str) -> bool:
     """Update a docker-compose.yml file to include the timezone setting."""
     print(f"Updating {file_path}...")
 
@@ -104,7 +105,7 @@ def update_docker_compose(file_path):
         return False
 
 
-def update_env_template(project_dir):
+def update_env_template(project_dir: str) -> bool:
     """Update .env.template file to include the timezone setting."""
     env_template = os.path.join(project_dir, ".env.template")
 
@@ -137,7 +138,7 @@ def update_env_template(project_dir):
     return True
 
 
-def update_env(project_dir):
+def update_env(project_dir: str) -> bool:
     """Update .env file to include the timezone setting if it exists."""
     env_file = os.path.join(project_dir, ".env")
 
@@ -170,7 +171,7 @@ def update_env(project_dir):
     return True
 
 
-def main():
+def main() -> None:
     """Update timezone settings in all configured projects."""
     for project in PROJECTS:
         project_dir = os.path.abspath(project)

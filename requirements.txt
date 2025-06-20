@@ -1,5 +1,6 @@
 # API client
 fogis-api-client-timmyBird==0.5.3
+jsonschema>=4.17.3
 
 # HTTP and parsing
 requests>=2.25.0

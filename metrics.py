@@ -7,7 +7,21 @@ Provides classes and functions to record and expose metrics.
 
 import threading
 import time
+from typing import Any, Dict, Iterable, List, Optional, Protocol, Tuple
 
+
+# Define StartResponse type for WSGI
+class StartResponse(Protocol):
+    """Protocol for WSGI start_response callable."""
+
+    def __call__(
+        self, status: str, headers: List[Tuple[str, str]], exc_info: Optional[Any] = None
+    ) -> None:
+        """Call the start_response function."""
+        ...
+
+
+# Import prometheus client
 from prometheus_client import Counter, Gauge, Histogram, start_http_server
 
 
@@ -154,7 +168,10 @@ class Metrics:
 class ApiRequestTimer:
     """Context manager for timing API requests."""
 
-    def __init__(self, histogram):
+    histogram: Histogram
+    start: float
+
+    def __init__(self, histogram: Histogram) -> None:
         """
         Initialize the timer.
 
@@ -163,12 +180,12 @@ class ApiRequestTimer:
         """
         self.histogram = histogram
 
-    def __enter__(self):
+    def __enter__(self) -> "ApiRequestTimer":
         """Start the timer."""
         self.start = time.time()
         return self
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, exc_type: Optional[type], exc_val: Optional[Exception], exc_tb: Any) -> None:
         """
         Stop the timer and record the time.
 
@@ -185,7 +202,7 @@ metrics = Metrics()
 
 
 # Health check endpoint handler
-def health_check_handler(environ, start_response):
+def health_check_handler(environ: Dict[str, Any], start_response: StartResponse) -> Iterable[bytes]:
     """
     Handle health check requests.
 
