@@ -1,32 +1,44 @@
 documentation:
-  - README.md
-  - docs/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - README.md
+    - docs/**/*
 
 dependencies:
-  - requirements.txt
-  - Pipfile
-  - Pipfile.lock
-  - pyproject.toml
-  - setup.py
-  - .pre-commit-config.yaml
+- changed-files:
+  - any-glob-to-any-file:
+    - requirements.txt
+    - Pipfile
+    - Pipfile.lock
+    - pyproject.toml
+    - setup.py
+    - .pre-commit-config.yaml
 
 docker:
-  - Dockerfile
-  - docker-compose.yml
-  - scheduled-docker-compose.yml
-  - docker-compose.override.yml.example
+- changed-files:
+  - any-glob-to-any-file:
+    - Dockerfile
+    - docker-compose.yml
+    - scheduled-docker-compose.yml
+    - docker-compose.override.yml.example
 
 tests:
-  - tests/**/*
-  - pytest.ini
+- changed-files:
+  - any-glob-to-any-file:
+    - tests/**/*
+    - pytest.ini
 
 github-actions:
-  - .github/workflows/*
+- changed-files:
+  - any-glob-to-any-file:
+    - .github/workflows/*
 
 configuration:
-  - config.py
-  - logging_config.py
-  - setup.cfg
-  - .env.example
-  - .coveragerc
-  - stubs/**/*
+- changed-files:
+  - any-glob-to-any-file:
+    - config.py
+    - logging_config.py
+    - setup.cfg
+    - .env.example
+    - .coveragerc
+    - stubs/**/*
