@@ -2,7 +2,10 @@ FROM python:3.9-slim
 
 WORKDIR /app
 
-# Install dependencies
+# Install FOGIS API client from PyPI (version 0.5.3 with pipeline fixes)
+RUN pip install --no-cache-dir fogis-api-client-timmyBird==0.5.3
+
+# Install other dependencies
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
