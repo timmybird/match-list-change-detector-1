@@ -13,6 +13,8 @@ DEFAULT_CONFIG = {
     # API credentials
     "FOGIS_USERNAME": "",
     "FOGIS_PASSWORD": "",
+    # Centralized API client URL (takes precedence over direct API access)
+    "FOGIS_API_CLIENT_URL": "",
     # Match list configuration
     "DAYS_BACK": 7,
     "DAYS_AHEAD": 365,
