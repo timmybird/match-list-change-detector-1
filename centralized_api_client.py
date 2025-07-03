@@ -6,24 +6,26 @@ This module provides a wrapper around the centralized FOGIS API client service,
 allowing services to use either the centralized service or direct API access.
 """
 
-import json
 import logging
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, Optional
 
 import requests
-from fogis_api_client import FogisApiClient, MatchListFilter
+from fogis_api_client import FogisApiClient
 
 logger = logging.getLogger(__name__)
 
 
 class CentralizedFogisApiClient:
-    """
-    Centralized FOGIS API client that can use either the centralized service
-    or direct API access based on configuration.
+    """Centralized FOGIS API client.
+
+    Can use either the centralized service or direct API access based on configuration.
     """
 
     def __init__(
-        self, api_client_url: Optional[str] = None, username: str = "", password: str = ""
+        self,
+        api_client_url: Optional[str] = None,
+        username: str = "",
+        password: str = "",  # nosec B107
     ):
         """
         Initialize the centralized API client.
