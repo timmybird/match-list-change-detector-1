@@ -14,8 +14,8 @@ from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 
 from fogis_api_client import MatchListFilter
-from centralized_api_client import CentralizedFogisApiClient
 
+from centralized_api_client import CentralizedFogisApiClient
 from config import get_config
 from health_server import HealthServer
 from logging_config import get_logger
@@ -197,9 +197,7 @@ class MatchListChangeDetector:
         # Use centralized API client if URL is provided, otherwise use direct API
         api_client_url = config.get("FOGIS_API_CLIENT_URL")
         self.api_client = CentralizedFogisApiClient(
-            api_client_url=api_client_url,
-            username=username,
-            password=password
+            api_client_url=api_client_url, username=username, password=password
         )
         self.previous_matches = []
         self.current_matches = []
@@ -279,8 +277,8 @@ class MatchListChangeDetector:
                 api_response = self.api_client.fetch_matches_list_json(filter_params=payload)
 
                 # Handle different response structures from PyPI package
-                if isinstance(api_response, dict) and 'matches' in api_response:
-                    self.current_matches = api_response['matches']
+                if isinstance(api_response, dict) and "matches" in api_response:
+                    self.current_matches = api_response["matches"]
                 elif isinstance(api_response, list):
                     self.current_matches = api_response
                 else:

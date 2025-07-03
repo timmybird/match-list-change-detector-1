@@ -22,7 +22,9 @@ class CentralizedFogisApiClient:
     or direct API access based on configuration.
     """
 
-    def __init__(self, api_client_url: Optional[str] = None, username: str = "", password: str = ""):
+    def __init__(
+        self, api_client_url: Optional[str] = None, username: str = "", password: str = ""
+    ):
         """
         Initialize the centralized API client.
 
@@ -72,7 +74,9 @@ class CentralizedFogisApiClient:
                     return False
             return False
 
-    def fetch_matches_list_json(self, filter_params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def fetch_matches_list_json(
+        self, filter_params: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
         Fetch matches list as JSON.
 
@@ -87,7 +91,9 @@ class CentralizedFogisApiClient:
         else:
             return self._fetch_from_direct_api(filter_params)
 
-    def _fetch_from_centralized_service(self, filter_params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def _fetch_from_centralized_service(
+        self, filter_params: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
         Fetch matches from the centralized service.
 
@@ -99,7 +105,7 @@ class CentralizedFogisApiClient:
         """
         try:
             url = f"{self.api_client_url}/matches"
-            
+
             # Add filter parameters as query parameters if provided
             params = {}
             if filter_params:
@@ -116,25 +122,20 @@ class CentralizedFogisApiClient:
             response.raise_for_status()
 
             matches_data = response.json()
-            logger.info(f"Successfully fetched {len(matches_data)} matches from centralized service")
+            logger.info(
+                f"Successfully fetched {len(matches_data)} matches from centralized service"
+            )
 
             # Return in the expected format
-            return {
-                "matches": matches_data,
-                "total": len(matches_data),
-                "status": "success"
-            }
+            return {"matches": matches_data, "total": len(matches_data), "status": "success"}
 
         except requests.RequestException as e:
             logger.error(f"Failed to fetch matches from centralized service: {e}")
-            return {
-                "matches": [],
-                "total": 0,
-                "status": "error",
-                "error": str(e)
-            }
+            return {"matches": [], "total": 0, "status": "error", "error": str(e)}
 
-    def _fetch_from_direct_api(self, filter_params: Optional[Dict[str, Any]] = None) -> Dict[str, Any]:
+    def _fetch_from_direct_api(
+        self, filter_params: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """
         Fetch matches from the direct FOGIS API.
 
@@ -150,7 +151,7 @@ class CentralizedFogisApiClient:
                 "matches": [],
                 "total": 0,
                 "status": "error",
-                "error": "Direct API client not initialized"
+                "error": "Direct API client not initialized",
             }
 
         try:
@@ -159,9 +160,4 @@ class CentralizedFogisApiClient:
 
         except Exception as e:
             logger.error(f"Failed to fetch matches from direct API: {e}")
-            return {
-                "matches": [],
-                "total": 0,
-                "status": "error",
-                "error": str(e)
-            }
+            return {"matches": [], "total": 0, "status": "error", "error": str(e)}
