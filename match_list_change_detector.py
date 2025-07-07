@@ -13,8 +13,9 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 
-from fogis_api_client import FogisApiClient, MatchListFilter
+from fogis_api_client import MatchListFilter
 
+from centralized_api_client import CentralizedFogisApiClient
 from config import get_config
 from health_server import HealthServer
 from logging_config import get_logger
@@ -186,14 +187,18 @@ def validate_file_path(
 class MatchListChangeDetector:
     """Detects changes in the match list and triggers actions when changes are found."""
 
-    api_client: FogisApiClient
+    api_client: CentralizedFogisApiClient
     previous_matches: List[Dict[str, Any]]
     current_matches: List[Dict[str, Any]]
     rate_limiter: RateLimiter
 
     def __init__(self, username: str, password: str):
         """Initialize the detector with API credentials."""
-        self.api_client = FogisApiClient(username, password)
+        # Use centralized API client if URL is provided, otherwise use direct API
+        api_client_url = config.get("FOGIS_API_CLIENT_URL")
+        self.api_client = CentralizedFogisApiClient(
+            api_client_url=api_client_url, username=username, password=password
+        )
         self.previous_matches = []
         self.current_matches = []
 
@@ -272,8 +277,8 @@ class MatchListChangeDetector:
                 api_response = self.api_client.fetch_matches_list_json(filter_params=payload)
 
                 # Handle different response structures from PyPI package
-                if isinstance(api_response, dict) and 'matches' in api_response:
-                    self.current_matches = api_response['matches']
+                if isinstance(api_response, dict) and "matches" in api_response:
+                    self.current_matches = api_response["matches"]
                 elif isinstance(api_response, list):
                     self.current_matches = api_response
                 else:
