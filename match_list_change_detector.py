@@ -272,8 +272,8 @@ class MatchListChangeDetector:
                 api_response = self.api_client.fetch_matches_list_json(filter_params=payload)
 
                 # Handle different response structures from PyPI package
-                if isinstance(api_response, dict) and 'matches' in api_response:
-                    self.current_matches = api_response['matches']
+                if isinstance(api_response, dict) and "matches" in api_response:
+                    self.current_matches = api_response["matches"]
                 elif isinstance(api_response, list):
                     self.current_matches = api_response
                 else:

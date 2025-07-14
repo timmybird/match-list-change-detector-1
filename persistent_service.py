@@ -206,7 +206,7 @@ class PersistentMatchListChangeDetectorService:
 
         self.server_thread = threading.Thread(target=run_server, daemon=True)
         self.server_thread.start()
-        logger.info(f"HTTP server started on {self.health_server_host}:{self.health_server_port}")
+        logger.info(f"HTTP server started on {self.health_server_host}: {self.health_server_port}")
 
     def run(self) -> None:
         """Run the main application logic."""
