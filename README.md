@@ -15,6 +15,22 @@ This application:
 4. If changes are detected, triggers a docker-compose file to handle the changes
 5. Saves the current matches for future comparisons
 
+## Service Modes
+
+The application supports two execution modes:
+
+### 🔄 **Persistent Service Mode** (Recommended)
+- **Long-running service** with internal cron scheduling
+- **HTTP server** for health checks and manual triggers
+- **Configurable scheduling** via environment variables
+- **Better operational visibility** and monitoring
+- **No restart loops** - runs continuously
+
+### ⚡ **Oneshot Mode** (Legacy)
+- **Run once and exit** (original behavior)
+- Suitable for external cron scheduling
+- Backward compatible with existing deployments
+
 ## Security
 
 This application follows security best practices:
@@ -162,6 +178,12 @@ docker logs match-list-change-detector
 
 You can customize the behavior of the change detector by modifying the following environment variables in your `.env` file:
 
+### Service Mode Configuration (NEW)
+- `RUN_MODE`: Service execution mode (`service` for persistent mode, `oneshot` for legacy mode) (default: `service`)
+- `CRON_SCHEDULE`: Cron pattern for scheduled execution in service mode (default: `0 * * * *` - hourly)
+- `HEALTH_SERVER_PORT`: Port for HTTP health server (default: `8000`)
+- `HEALTH_SERVER_HOST`: Host for HTTP health server (default: `0.0.0.0`)
+
 ### API Credentials
 - `FOGIS_USERNAME`: Your FOGIS username
 - `FOGIS_PASSWORD`: Your FOGIS password
@@ -184,6 +206,112 @@ You can customize the behavior of the change detector by modifying the following
 
 ### Timezone
 - `TZ`: Timezone (default: Europe/Stockholm)
+
+## Usage Examples
+
+### Persistent Service Mode (Recommended)
+
+Run as a long-running service with internal scheduling:
+
+```bash
+# Using docker-compose (recommended)
+docker-compose up -d
+
+# Or using Docker directly
+docker run -d \
+  -e RUN_MODE=service \
+  -e CRON_SCHEDULE="0 * * * *" \
+  -e FOGIS_USERNAME="your_username" \
+  -e FOGIS_PASSWORD="your_password" \
+  -p 8000:8000 \
+  --name match-list-change-detector \
+  match-list-change-detector
+```
+
+#### HTTP Endpoints
+
+When running in service mode, the following HTTP endpoints are available:
+
+- **Health Check**: `GET http://localhost:8000/health`
+  ```json
+  {
+    "service_name": "match-list-change-detector",
+    "status": "healthy",
+    "run_mode": "service",
+    "cron_schedule": "0 * * * *",
+    "last_execution": "2025-07-14T19:11:23.628903",
+    "next_execution": "2025-07-14T20:00:00",
+    "execution_count": 1,
+    "uptime_seconds": 3600.5,
+    "timestamp": "2025-07-14T19:11:32.270506"
+  }
+  ```
+
+- **Manual Trigger**: `POST http://localhost:8000/trigger`
+  ```json
+  {
+    "status": "success",
+    "message": "Change detection executed successfully"
+  }
+  ```
+
+- **Service Status**: `GET http://localhost:8000/status`
+  ```json
+  {
+    "service_name": "match-list-change-detector",
+    "run_mode": "service",
+    "running": true,
+    "cron_schedule": "0 * * * *",
+    "configuration": {
+      "health_server_port": 8000,
+      "fogis_username": "your_username",
+      "fogis_password_set": true
+    }
+  }
+  ```
+
+#### Cron Schedule Examples
+
+- `0 * * * *` - Every hour at minute 0
+- `*/30 * * * *` - Every 30 minutes
+- `0 9,17 * * *` - At 9:00 AM and 5:00 PM daily
+- `0 9 * * 1-5` - At 9:00 AM on weekdays only
+
+### Oneshot Mode (Legacy)
+
+Run once and exit (original behavior):
+
+```bash
+# Set RUN_MODE to oneshot
+docker run --rm \
+  -e RUN_MODE=oneshot \
+  -e FOGIS_USERNAME="your_username" \
+  -e FOGIS_PASSWORD="your_password" \
+  match-list-change-detector
+```
+
+### Migration from Oneshot to Service Mode
+
+If you're currently using external cron scheduling with oneshot mode, you can migrate to service mode:
+
+1. **Update your docker-compose.yml**:
+   ```yaml
+   environment:
+     - RUN_MODE=service                    # Change from oneshot
+     - CRON_SCHEDULE=0 * * * *            # Set your desired schedule
+   ```
+
+2. **Remove external cron jobs** that were triggering the oneshot mode
+
+3. **Add health checks** to your monitoring system:
+   ```bash
+   curl -f http://localhost:8000/health
+   ```
+
+4. **Restart the service**:
+   ```bash
+   docker-compose up -d
+   ```
 
 ## CI/CD Pipeline
 
