@@ -68,7 +68,9 @@ try:
             home_team = match.get("lag1namn", "Unknown home team")
             away_team = match.get("lag2namn", "Unknown away team")
             venue = match.get("anlaggningnamn", "Unknown venue")
-            logger.info(f"{i+1}. {match_date} {match_time}: {home_team} vs {away_team} at {venue}")
+            logger.info(
+                f"{i + 1}. {match_date} {match_time}: {home_team} vs {away_team} at {venue}"
+            )
 
 except Exception as e:
     logger.error(f"Error fetching matches: {e}")
