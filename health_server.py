@@ -9,7 +9,7 @@ import logging
 import ssl
 import threading
 from pathlib import Path
-from typing import Any, Dict, Iterable, List, Optional, Protocol, Tuple, cast, Callable
+from typing import Any, Callable, Dict, Iterable, List, Optional, Protocol, Tuple, cast
 from wsgiref.simple_server import make_server
 
 
