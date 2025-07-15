@@ -9,6 +9,8 @@ import threading
 import time
 from typing import Any, Dict, Iterable, List, Optional, Protocol, Tuple
 
+from prometheus_client import Counter, Gauge, Histogram, start_http_server
+
 
 # Define StartResponse type for WSGI
 class StartResponse(Protocol):
@@ -19,10 +21,6 @@ class StartResponse(Protocol):
     ) -> None:
         """Call the start_response function."""
         ...
-
-
-# Import prometheus client
-from prometheus_client import Counter, Gauge, Histogram, start_http_server
 
 
 # Define metrics
