@@ -62,7 +62,7 @@ jobs:
 
             const comment = '## Reminder About Contributing Guidelines\n\n' +
               'When working on this ' + issueOrPR + ', please remember to follow the project\'s ' +
-              '[CONTRIBUTING.md](https://github.com/timmybird/match-list-change-detector/blob/develop/CONTRIBUTING.md) ' +
+              '[CONTRIBUTING.md](https://github.com/PitchConnect/match-list-change-detector/blob/develop/CONTRIBUTING.md) ' +
               'guidelines. This is especially important for AI assistants who may not automatically check these guidelines.\n\n' +
               'Key points to remember:\n' +
               '- Follow the Gitflow workflow (feature branches from develop)\n' +
