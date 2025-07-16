@@ -6,6 +6,8 @@ HTTP server for health checks and manual triggers, and configurable cron pattern
 
 This addresses the restart loop issues by running the service continuously
 instead of the oneshot execution model.
+
+For contributing guidelines, see CONTRIBUTING.md in the repository root.
 """
 
 import asyncio
