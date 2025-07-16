@@ -50,7 +50,7 @@ if detector.fetch_current_matches():
         away_team = match.get("bortalag", "Unknown away team")
         arena = match.get("arena", "Unknown arena")
         logger.info(
-            f"Match {i+1}: {match_date} {match_time} - {home_team} vs {away_team} at {arena}"
+            f"Match {i + 1}: {match_date} {match_time} - {home_team} vs {away_team} at {arena}"
         )
 else:
     logger.error("Failed to fetch matches")
