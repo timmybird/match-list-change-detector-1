@@ -139,7 +139,7 @@ class RateLimiter:
         oldest_timestamp = self.request_timestamps[0]
         wait_time = self.time_window - (current_time - oldest_timestamp) + 0.1  # Add a small buffer
 
-        logger.info(f"Rate limit reached. Waiting {wait_time:.2f} seconds before next request.")
+        logger.info(f"Rate limit reached. Waiting {wait_time: .2f} seconds before next request.")
         time.sleep(wait_time)
 
         # Add the new timestamp and remove the oldest one
@@ -551,7 +551,7 @@ class MatchListChangeDetector:
             # Record processing time
             processing_time = time.time() - start_time
             metrics.record_processing_time(processing_time)
-            logger.info(f"Change detection completed in {processing_time:.2f} seconds")
+            logger.info(f"Change detection completed in {processing_time: .2f} seconds")
 
             return True
 
