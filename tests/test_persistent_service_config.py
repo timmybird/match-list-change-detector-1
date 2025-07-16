@@ -52,7 +52,7 @@ class TestPersistentServiceConfig(unittest.TestCase):
             "RUN_MODE": "service",
             "CRON_SCHEDULE": "0 */2 * * *",
             "HEALTH_SERVER_PORT": "8080",
-            "HEALTH_SERVER_HOST": "0.0.0.0"  # nosec B104,
+            "HEALTH_SERVER_HOST": "0.0.0.0",  # nosec B104,
         },
     )
     def test_persistent_service_initialization(self) -> None:
