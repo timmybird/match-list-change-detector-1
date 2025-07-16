@@ -41,7 +41,7 @@ class PersistentMatchListChangeDetectorService:
         self.run_mode = self.config.get("RUN_MODE", "oneshot").lower()
         self.cron_schedule = self.config.get("CRON_SCHEDULE", "0 * * * *")
         self.health_server_port = int(self.config.get("HEALTH_SERVER_PORT", "8000"))
-        self.health_server_host = self.config.get("HEALTH_SERVER_HOST", "127.0.0.1")  # nosec B104
+        self.health_server_host = self.config.get("HEALTH_SERVER_HOST", "0.0.0.0")  # nosec B104
 
         # Service state
         self.running = True
