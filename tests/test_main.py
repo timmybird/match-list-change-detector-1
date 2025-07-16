@@ -10,8 +10,10 @@ from unittest.mock import MagicMock, patch
 
 # Mock the imports that would cause issues
 with patch("sys.modules", {"fogis_api_client": MagicMock()}):
-    # Now import the main function
-    from match_list_change_detector import main
+    # Mock health_server to prevent import issues in CI
+    with patch("match_list_change_detector.HealthServer", MagicMock()):
+        # Now import the main function
+        from match_list_change_detector import main
 
 
 class TestMain(unittest.TestCase):

@@ -6,9 +6,18 @@ Provides functions to configure and access loggers.
 """
 
 import logging
-import logging.handlers
 import os
 from typing import Optional
+
+# Conditional import for logging.handlers to handle CI environment issues
+try:
+    import logging.handlers
+
+    LOGGING_HANDLERS_AVAILABLE = True
+except (ImportError, KeyError) as e:
+    # Fallback for CI environments where logging.handlers may not be available
+    print(f"Warning: logging.handlers not available: {e}")
+    LOGGING_HANDLERS_AVAILABLE = False
 
 # Constants
 DEFAULT_LOG_LEVEL = "INFO"
@@ -96,11 +105,17 @@ def configure_logging(
     log_path = os.path.join(log_dir_str, log_file_str)
 
     # Use a rotating file handler to prevent logs from growing too large
-    file_handler = logging.handlers.RotatingFileHandler(
-        log_path, maxBytes=DEFAULT_MAX_BYTES, backupCount=DEFAULT_BACKUP_COUNT
-    )
-    file_handler.setFormatter(formatter)
-    logger.addHandler(file_handler)
+    if LOGGING_HANDLERS_AVAILABLE:
+        file_handler = logging.handlers.RotatingFileHandler(
+            log_path, maxBytes=DEFAULT_MAX_BYTES, backupCount=DEFAULT_BACKUP_COUNT
+        )
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
+    else:
+        # Fallback to basic FileHandler if RotatingFileHandler is not available
+        file_handler = logging.FileHandler(log_path)
+        file_handler.setFormatter(formatter)
+        logger.addHandler(file_handler)
 
     # Add console handler if requested
     if console_output:

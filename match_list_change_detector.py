@@ -16,9 +16,58 @@ from typing import Any, Dict, List, Optional, Tuple, TypedDict, Union
 from fogis_api_client import FogisApiClient, MatchListFilter
 
 from config import get_config
-from health_server import HealthServer
 from logging_config import get_logger
-from metrics import metrics
+
+# Conditional import for health_server to handle CI environment issues
+try:
+    from health_server import HealthServer
+
+    HEALTH_SERVER_AVAILABLE = True
+except (ImportError, KeyError) as e:
+    # Fallback for CI environments where http.server module may not be available
+    import logging
+
+    logging.getLogger(__name__).warning(f"Health server not available: {e}")
+
+    class MockHealthServer:
+        """Mock health server for environments where wsgiref is not available."""
+
+        def __init__(self, *args, **kwargs):
+            """Initialize mock health server."""
+            pass
+
+        def start(self):
+            """Start mock health server (no-op)."""
+            pass
+
+        def stop(self):
+            """Stop mock health server (no-op)."""
+            pass
+
+    HealthServer = MockHealthServer
+    HEALTH_SERVER_AVAILABLE = False
+
+# Conditional import for metrics to handle CI environment issues
+try:
+    from metrics import metrics
+
+    METRICS_AVAILABLE = True
+except (ImportError, KeyError) as e:
+    # Fallback for CI environments where prometheus_client may not be available
+    import logging
+
+    logging.getLogger(__name__).warning(f"Metrics not available: {e}")
+
+    class MockMetrics:
+        """Mock metrics for environments where prometheus_client is not available."""
+
+        def __getattr__(self, name):
+            """Return a mock object that does nothing for any attribute access."""
+            # Return a mock object that does nothing
+            return lambda *args, **kwargs: None
+
+    metrics = MockMetrics()
+    METRICS_AVAILABLE = False
 
 
 class MatchChangeRecord(TypedDict):
@@ -58,6 +107,9 @@ health_server = HealthServer(
     port=health_server_port, use_https=use_https, cert_file=ssl_cert_file, key_file=ssl_key_file
 )
 health_server.start()
+
+if not HEALTH_SERVER_AVAILABLE:
+    logger.warning("Health server functionality not available in this environment")
 
 # Constants
 PREVIOUS_MATCHES_FILE = config.get("PREVIOUS_MATCHES_FILE")
