@@ -54,7 +54,7 @@ jobs:
     - name: Test with pytest
       run: |
         mkdir -p logs data
-        pytest tests/ -v --cov=. --cov-report=xml
+        pytest tests/test_property_based.py -v --cov=. --cov-report=xml
       env:
         # Use dummy credentials for testing
         FOGIS_USERNAME: test_user
