@@ -331,10 +331,18 @@ class MatchListChangeDetector:
                 # Handle different response structures from PyPI package
                 if isinstance(api_response, dict) and "matches" in api_response:
                     self.current_matches = api_response["matches"]
+                elif isinstance(api_response, dict) and "matchlista" in api_response:
+                    # Handle direct FOGIS API response structure
+                    self.current_matches = api_response["matchlista"]
+                    logger.info(
+                        f"Using matchlista from direct FOGIS API: {len(self.current_matches)} matches"
+                    )
                 elif isinstance(api_response, list):
                     self.current_matches = api_response
                 else:
                     logger.error(f"Unexpected API response structure: {type(api_response)}")
+                    if isinstance(api_response, dict):
+                        logger.debug(f"Available keys: {list(api_response.keys())}")
                     logger.debug(f"Response content: {api_response}")
                     self.current_matches = []
             logger.info(f"Successfully fetched {len(self.current_matches)} current matches")
@@ -504,6 +512,34 @@ class MatchListChangeDetector:
 
         return has_changes, changes
 
+    def trigger_calendar_sync(self, changes: Union[ChangesSummary, Dict[str, Any]]) -> bool:
+        """Trigger calendar sync via direct API call instead of docker-compose."""
+        try:
+            import requests
+
+            # Call the calendar sync service directly
+            calendar_sync_url = "http://fogis-calendar-phonebook-sync:5003/sync"
+
+            logger.info(f"Triggering calendar sync at {calendar_sync_url}")
+
+            # Send POST request to trigger sync
+            response = requests.post(
+                calendar_sync_url, json={"trigger": "match_changes", "changes": changes}, timeout=30
+            )
+
+            if response.status_code == 200:
+                logger.info("Calendar sync triggered successfully")
+                return True
+            else:
+                logger.error(
+                    f"Calendar sync failed with status {response.status_code}: {response.text}"
+                )
+                return False
+
+        except Exception as e:
+            logger.error(f"Failed to trigger calendar sync: {e}")
+            return False
+
     # noinspection PyMethodMayBeStatic
     def trigger_docker_compose(self, changes: Union[ChangesSummary, Dict[str, Any]]) -> bool:
         """Trigger the docker-compose file with the changes as environment variables."""
@@ -595,11 +631,11 @@ class MatchListChangeDetector:
                     changed=changes.get("changed_matches", 0),
                 )
 
-            # If changes detected, trigger docker-compose
+            # If changes detected, trigger calendar sync
             if has_changes:
-                logger.info("Changes detected, triggering docker-compose")
+                logger.info("Changes detected, triggering calendar sync")
                 metrics.record_orchestrator_trigger()
-                if not self.trigger_docker_compose(changes):
+                if not self.trigger_calendar_sync(changes):
                     metrics.record_orchestrator_failure()
 
             # Save current matches for next comparison
