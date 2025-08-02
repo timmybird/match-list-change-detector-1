@@ -5,6 +5,11 @@ Simple health check server for the match list change detector.
 Provides a basic HTTP/HTTPS server that responds to health check requests.
 """
 
+# Apply Python 3.13+ compatibility fixes first
+from python_compat import fix_python_313_imports
+
+fix_python_313_imports()
+
 import logging
 import ssl
 import threading

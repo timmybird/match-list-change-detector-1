@@ -49,6 +49,13 @@ test_matches.json
 # Docker
 .docker/
 
+# Testing artifacts
+.coverage
+coverage.xml
+htmlcov/
+.pytest_cache/
+.hypothesis/
+
 # OS specific
 .DS_Store
 Thumbs.db

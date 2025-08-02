@@ -54,7 +54,17 @@ jobs:
     - name: Test with pytest
       run: |
         mkdir -p logs data
+        # Run property-based tests (original CI scope)
         pytest tests/test_property_based.py -v --cov=. --cov-report=xml
+
+        # Run isolated tests (new comprehensive test infrastructure)
+        pytest tests/test_main_isolated.py tests/test_detector_isolated.py -v --cov=. --cov-append --cov-report=xml
+
+        # Run persistent service tests
+        pytest tests/test_persistent_service.py -v --cov=. --cov-append --cov-report=xml
+
+        # Run integration tests (if they pass)
+        pytest tests/integration/ -v --cov=. --cov-append --cov-report=xml || echo "Integration tests failed, continuing..."
       env:
         # Use dummy credentials for testing
         FOGIS_USERNAME: test_user

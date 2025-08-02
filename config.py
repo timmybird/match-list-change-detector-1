@@ -13,8 +13,6 @@ DEFAULT_CONFIG = {
     # API credentials
     "FOGIS_USERNAME": "",
     "FOGIS_PASSWORD": "",
-    # Centralized API client URL (takes precedence over direct API access)
-    "FOGIS_API_CLIENT_URL": "",
     # Match list configuration
     "DAYS_BACK": 7,
     "DAYS_AHEAD": 365,
@@ -34,9 +32,14 @@ DEFAULT_CONFIG = {
     "SSL_CERT_FILE": "certs/server.crt",
     "SSL_KEY_FILE": "certs/server.key",
     "HEALTH_SERVER_PORT": 8000,
+    "HEALTH_SERVER_HOST": "0.0.0.0",  # nosec B104
     "METRICS_SERVER_PORT": 8001,
     # Rate limiting
     "API_RATE_LIMIT": 10,  # Maximum number of API requests per minute
+    # Persistent service mode configuration
+    "RUN_MODE": "oneshot",
+    "CRON_SCHEDULE": "0 * * * *",
+    "WEBHOOK_URL": "",
 }
 
 

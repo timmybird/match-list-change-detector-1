@@ -1,0 +1,9 @@
+Collecting hypothesis
+  Downloading hypothesis-6.135.32-py3-none-any.whl.metadata (5.6 kB)
+Requirement already satisfied: attrs>=22.2.0 in /Users/docker-admin/Library/Python/3.13/lib/python/site-packages (from hypothesis) (25.3.0)
+Collecting sortedcontainers<3.0.0,>=2.1.0 (from hypothesis)
+  Downloading sortedcontainers-2.4.0-py2.py3-none-any.whl.metadata (10 kB)
+Downloading hypothesis-6.135.32-py3-none-any.whl (523 kB)
+Downloading sortedcontainers-2.4.0-py2.py3-none-any.whl (29 kB)
+Installing collected packages: sortedcontainers, hypothesis
+Successfully installed hypothesis-6.135.32 sortedcontainers-2.4.0

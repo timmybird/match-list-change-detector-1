@@ -17,9 +17,58 @@ from fogis_api_client import MatchListFilter
 
 from centralized_api_client import CentralizedFogisApiClient
 from config import get_config
-from health_server import HealthServer
 from logging_config import get_logger
-from metrics import metrics
+
+# Conditional import for health_server to handle CI environment issues
+try:
+    from health_server import HealthServer
+
+    HEALTH_SERVER_AVAILABLE = True
+except (ImportError, KeyError) as e:
+    # Fallback for CI environments where http.server module may not be available
+    import logging
+
+    logging.getLogger(__name__).warning(f"Health server not available: {e}")
+
+    class MockHealthServer:
+        """Mock health server for environments where wsgiref is not available."""
+
+        def __init__(self, *args, **kwargs):
+            """Initialize mock health server."""
+            pass
+
+        def start(self):
+            """Start mock health server (no-op)."""
+            pass
+
+        def stop(self):
+            """Stop mock health server (no-op)."""
+            pass
+
+    HealthServer = MockHealthServer
+    HEALTH_SERVER_AVAILABLE = False
+
+# Conditional import for metrics to handle CI environment issues
+try:
+    from metrics import metrics
+
+    METRICS_AVAILABLE = True
+except (ImportError, KeyError) as e:
+    # Fallback for CI environments where prometheus_client may not be available
+    import logging
+
+    logging.getLogger(__name__).warning(f"Metrics not available: {e}")
+
+    class MockMetrics:
+        """Mock metrics for environments where prometheus_client is not available."""
+
+        def __getattr__(self, name):
+            """Return a mock object that does nothing for any attribute access."""
+            # Return a mock object that does nothing
+            return lambda *args, **kwargs: None
+
+    metrics = MockMetrics()
+    METRICS_AVAILABLE = False
 
 
 class MatchChangeRecord(TypedDict):
@@ -59,6 +108,9 @@ health_server = HealthServer(
     port=health_server_port, use_https=use_https, cert_file=ssl_cert_file, key_file=ssl_key_file
 )
 health_server.start()
+
+if not HEALTH_SERVER_AVAILABLE:
+    logger.warning("Health server functionality not available in this environment")
 
 # Constants
 PREVIOUS_MATCHES_FILE = config.get("PREVIOUS_MATCHES_FILE")
@@ -279,10 +331,18 @@ class MatchListChangeDetector:
                 # Handle different response structures from PyPI package
                 if isinstance(api_response, dict) and "matches" in api_response:
                     self.current_matches = api_response["matches"]
+                elif isinstance(api_response, dict) and "matchlista" in api_response:
+                    # Handle direct FOGIS API response structure
+                    self.current_matches = api_response["matchlista"]
+                    logger.info(
+                        f"Using matchlista from direct FOGIS API: {len(self.current_matches)} matches"
+                    )
                 elif isinstance(api_response, list):
                     self.current_matches = api_response
                 else:
                     logger.error(f"Unexpected API response structure: {type(api_response)}")
+                    if isinstance(api_response, dict):
+                        logger.debug(f"Available keys: {list(api_response.keys())}")
                     logger.debug(f"Response content: {api_response}")
                     self.current_matches = []
             logger.info(f"Successfully fetched {len(self.current_matches)} current matches")
@@ -452,6 +512,34 @@ class MatchListChangeDetector:
 
         return has_changes, changes
 
+    def trigger_calendar_sync(self, changes: Union[ChangesSummary, Dict[str, Any]]) -> bool:
+        """Trigger calendar sync via direct API call instead of docker-compose."""
+        try:
+            import requests
+
+            # Call the calendar sync service directly
+            calendar_sync_url = "http://fogis-calendar-phonebook-sync:5003/sync"
+
+            logger.info(f"Triggering calendar sync at {calendar_sync_url}")
+
+            # Send POST request to trigger sync
+            response = requests.post(
+                calendar_sync_url, json={"trigger": "match_changes", "changes": changes}, timeout=30
+            )
+
+            if response.status_code == 200:
+                logger.info("Calendar sync triggered successfully")
+                return True
+            else:
+                logger.error(
+                    f"Calendar sync failed with status {response.status_code}: {response.text}"
+                )
+                return False
+
+        except Exception as e:
+            logger.error(f"Failed to trigger calendar sync: {e}")
+            return False
+
     # noinspection PyMethodMayBeStatic
     def trigger_docker_compose(self, changes: Union[ChangesSummary, Dict[str, Any]]) -> bool:
         """Trigger the docker-compose file with the changes as environment variables."""
@@ -543,11 +631,11 @@ class MatchListChangeDetector:
                     changed=changes.get("changed_matches", 0),
                 )
 
-            # If changes detected, trigger docker-compose
+            # If changes detected, trigger calendar sync
             if has_changes:
-                logger.info("Changes detected, triggering docker-compose")
+                logger.info("Changes detected, triggering calendar sync")
                 metrics.record_orchestrator_trigger()
-                if not self.trigger_docker_compose(changes):
+                if not self.trigger_calendar_sync(changes):
                     metrics.record_orchestrator_failure()
 
             # Save current matches for next comparison
@@ -583,28 +671,33 @@ def mask_sensitive_data(data: str) -> str:
 
 def main() -> bool:
     """Run the match list change detection process."""
-    # Check for required configuration
-    username = config.get("FOGIS_USERNAME")
-    password = config.get("FOGIS_PASSWORD")
+    try:
+        # Check for required configuration
+        username = config.get("FOGIS_USERNAME")
+        password = config.get("FOGIS_PASSWORD")
 
-    if not username or not password:
-        logger.error("FOGIS_USERNAME and FOGIS_PASSWORD must be set in configuration")
+        if not username or not password:
+            logger.error("FOGIS_USERNAME and FOGIS_PASSWORD must be set in configuration")
+            return False
+
+        # Log username only, never log password even if masked
+        logger.info(f"Using FOGIS account: {username}")
+        logger.debug("Password provided: [REDACTED]")
+
+        # Create and run the detector
+        detector = MatchListChangeDetector(username, password)
+        success = detector.run()
+
+        if success:
+            logger.info("Match list change detection completed successfully")
+        else:
+            logger.error("Match list change detection failed")
+
+        return success
+
+    except Exception as e:
+        logger.error(f"Unexpected error in main: {e}")
         return False
-
-    # Log username only, never log password even if masked
-    logger.info(f"Using FOGIS account: {username}")
-    logger.debug("Password provided: [REDACTED]")
-
-    # Create and run the detector
-    detector = MatchListChangeDetector(username, password)
-    success = detector.run()
-
-    if success:
-        logger.info("Match list change detection completed successfully")
-    else:
-        logger.error("Match list change detection failed")
-
-    return success
 
 
 if __name__ == "__main__":

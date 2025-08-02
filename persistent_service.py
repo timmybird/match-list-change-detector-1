@@ -6,8 +6,6 @@ HTTP server for health checks and manual triggers, and configurable cron pattern
 
 This addresses the restart loop issues by running the service continuously
 instead of the oneshot execution model.
-
-For contributing guidelines, see CONTRIBUTING.md in the repository root.
 """
 
 import asyncio
@@ -20,7 +18,7 @@ from types import FrameType
 from typing import Any, Dict, Optional
 
 import uvicorn
-from croniter import croniter
+from croniter import croniter  # type: ignore[import]
 from fastapi import FastAPI, HTTPException
 from fastapi.responses import JSONResponse
 
@@ -43,7 +41,7 @@ class PersistentMatchListChangeDetectorService:
         self.run_mode = self.config.get("RUN_MODE", "oneshot").lower()
         self.cron_schedule = self.config.get("CRON_SCHEDULE", "0 * * * *")
         self.health_server_port = int(self.config.get("HEALTH_SERVER_PORT", "8000"))
-        self.health_server_host = self.config.get("HEALTH_SERVER_HOST", "127.0.0.1")  # nosec B104
+        self.health_server_host = self.config.get("HEALTH_SERVER_HOST", "0.0.0.0")  # nosec B104
 
         # Service state
         self.running = True
@@ -85,8 +83,8 @@ class PersistentMatchListChangeDetectorService:
             version="1.0.0",
         )
 
-        @app.get("/health")
-        async def health_check() -> Dict[str, Any]:
+        @app.get("/health")  # type: ignore[misc]
+        async def health_check() -> JSONResponse:
             """Health check endpoint."""
             status = "healthy" if self.running else "unhealthy"
 
@@ -105,7 +103,7 @@ class PersistentMatchListChangeDetectorService:
             status_code = 200 if status == "healthy" else 503
             return JSONResponse(status_code=status_code, content=health_data)
 
-        @app.post("/trigger")
+        @app.post("/trigger")  # type: ignore[misc]
         async def manual_trigger() -> Dict[str, str]:
             """Manual trigger endpoint for immediate execution."""
             if not self.running:
@@ -119,7 +117,7 @@ class PersistentMatchListChangeDetectorService:
                 logger.error(f"Manual trigger failed: {e}")
                 raise HTTPException(status_code=500, detail=f"Execution failed: {str(e)}")
 
-        @app.get("/status")
+        @app.get("/status")  # type: ignore[misc]
         async def service_status() -> Dict[str, Any]:
             """Detailed service status endpoint."""
             return {
